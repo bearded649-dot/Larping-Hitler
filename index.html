@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>LARPING HITLER</title>
+<style>
+:root{--g:#4b5d3a;--k:#0d0f0b;--d:#1c201a;--b:#d8cba8;--r:#c0392b;--w:#ece6d4}
+*{box-sizing:border-box}body{margin:0;background:var(--k);color:var(--w);font:14px system-ui,sans-serif}
+.m,h1,h3,small,button{font-family:Consolas,monospace}
+#app{display:grid;grid-template-columns:230px 1fr 230px;gap:6px;padding:6px;min-height:100vh}
+#top{grid-column:1/4;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.p{background:var(--d);border:1px solid var(--g);padding:8px;border-radius:3px}
+h3{margin:0 0 6px;color:var(--b);font-size:13px}
+button{display:block;width:100%;margin:4px 0;padding:8px;background:#2a3324;color:var(--w);border:1px solid var(--g);cursor:pointer;text-align:left;font-size:12px}
+button:hover:not(:disabled){background:var(--g)}button:disabled{opacity:.4;cursor:not-allowed}
+.bar{height:8px;background:#000;margin:2px 0 6px}.bar i{display:block;height:100%;background:var(--g);transition:width .5s}.bar.r i{background:var(--r)}
+.row{display:flex;justify-content:space-between;font-size:12px}
+#log{grid-column:1/4;max-height:110px;overflow:auto;font-size:12px}
+svg rect{stroke:#000;stroke-width:2;cursor:pointer}svg text{font:10px Consolas,monospace;fill:#fff;pointer-events:none}
+.ov{position:fixed;inset:0;background:rgba(13,15,11,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:9;text-align:center;padding:20px}
+.ov button{width:280px;text-align:center}.ov h1{color:var(--b);letter-spacing:4px;margin:0}
+#toast{position:fixed;right:10px;top:10px;background:var(--r);padding:8px;display:none;z-index:10}
+.alert{animation:bl 1s infinite}@keyframes bl{50%{opacity:.5}}
+.noanim *{animation:none!important;transition:none!important}
+@media(max-width:800px){#app{grid-template-columns:1fr}#top,#log{grid-column:1}}
+
+body{background:radial-gradient(ellipse at 50% 0,#1d2418,#0a0c08 70%) fixed;font-family:"Segoe UI",system-ui,sans-serif}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:20;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);opacity:.5}
+body.warn::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:19;box-shadow:inset 0 0 140px rgba(192,57,43,.4);animation:pu 2s infinite}
+.p{background:linear-gradient(160deg,#222a1e,#161a13);border:1px solid #3d4d31;box-shadow:inset 0 0 18px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.5);position:relative;animation:su .5s both}
+.p h3{border-bottom:1px solid #3d4d31;padding-bottom:4px;letter-spacing:2px;text-transform:uppercase}
+#top{background:linear-gradient(90deg,#2b3524,#161a13);border-bottom:2px solid var(--b)}#top b{color:var(--b);letter-spacing:3px}
+button{transition:all .2s;border-left:3px solid var(--g);background:linear-gradient(90deg,#2a3324,#1f261b)}
+button:hover:not(:disabled){transform:translateX(4px);border-left-color:var(--b);box-shadow:0 0 10px rgba(216,203,168,.25)}
+.bar{border:1px solid #2a3324;border-radius:2px;overflow:hidden}
+.bar i{background:linear-gradient(90deg,#3c4c2e,#7fa05a);animation:gr .7s ease-out}
+.bar.r i{background:repeating-linear-gradient(45deg,#c0392b 0 6px,#8e281d 6px 12px);background-size:17px 17px;animation:gr .7s ease-out,st 1s linear infinite}
+.bar.up{animation:fu 1s}.bar.dn{animation:fd 1s}
+#main{background:linear-gradient(#e4d8b6,#cdbf96);color:#221f14;overflow:hidden;border:1px solid #8a7d55}
+#main h3{color:#3a2d0e;border-color:#8a7d55}
+#main::after{content:'CONFIDENCIAL';position:absolute;right:12px;top:8px;color:rgba(192,57,43,.4);border:3px solid rgba(192,57,43,.4);padding:2px 8px;transform:rotate(-8deg);font:bold 16px Consolas,monospace;pointer-events:none}
+#main[data-ph=event]{animation:evp 1.6s infinite}
+.fx>*{animation:su .45s both}.fx>:nth-child(2){animation-delay:.08s}.fx>:nth-child(3){animation-delay:.16s}.fx>:nth-child(4){animation-delay:.24s}.fx>:nth-child(n+5){animation-delay:.32s}
+.rp.win{border-left:4px solid #5f9a3c;padding-left:8px;animation:glow 1.2s}.rp.lose{border-left:4px solid var(--r);padding-left:8px;animation:shake .5s}
+#map{background:#0d120b;background-image:linear-gradient(#1a2214 1px,transparent 1px),linear-gradient(90deg,#1a2214 1px,transparent 1px);background-size:20px 20px}
+.t{transition:filter .2s}.t.o{fill:#4b5d3a}.t.e{fill:url(#h)}.t:hover{filter:brightness(1.35)}
+.t.bd{stroke:#d8cba8;stroke-dasharray:2 5;animation:da 2s linear infinite}
+.t.s{stroke:#f1e8cc;stroke-width:3;stroke-dasharray:8 4;animation:da 1s linear infinite}
+.t.flip{animation:fl 1s}svg text{font-size:11px;text-shadow:0 0 3px #000}
+.ov{animation:fi .5s}.ov h1,.ov button,.ov p{animation:su .6s both}.ov button:nth-of-type(2){animation-delay:.1s}.ov button:nth-of-type(3){animation-delay:.2s}.ov button:nth-of-type(4){animation-delay:.3s}.ov button:nth-of-type(5){animation-delay:.4s}
+#menu{overflow:hidden}#menu::before{content:'';position:absolute;width:140vmax;height:140vmax;left:50%;top:50%;margin:-70vmax;border-radius:50%;background:conic-gradient(rgba(95,154,60,.2),transparent 25%);animation:rot 6s linear infinite;z-index:-1}
+.glitch{position:relative;font-size:42px}.glitch::before{content:attr(data-t);position:absolute;left:0;right:0;top:0;color:#c0392b;animation:gl 3s infinite steps(1)}
+#toast{animation:su .3s}.shk{animation:shake .5s}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--g)}
+@keyframes su{from{opacity:0;transform:translateY(10px)}}@keyframes fi{from{opacity:0}}@keyframes gr{from{width:var(--f)}}@keyframes st{to{background-position:17px 0}}
+@keyframes fu{0%{box-shadow:0 0 10px #8fbf6a}}@keyframes fd{0%{box-shadow:0 0 10px #c0392b}}@keyframes da{to{stroke-dashoffset:-24}}@keyframes fl{0%{filter:brightness(3)}}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}@keyframes glow{0%{box-shadow:0 0 24px #5f9a3c}}
+@keyframes pu{50%{opacity:.4}}@keyframes evp{50%{box-shadow:0 0 16px #c0392b}}@keyframes rot{to{transform:rotate(360deg)}}
+@keyframes gl{0%,92%{opacity:0}93%{opacity:.8;transform:translate(-3px,1px);clip-path:inset(20% 0 50% 0)}96%{opacity:.8;transform:translate(3px,-1px);clip-path:inset(60% 0 10% 0)}100%{opacity:0}}
+
+.p::before{content:'';position:absolute;inset:3px;border:1px solid rgba(216,203,168,.09);pointer-events:none}
+#top{box-shadow:0 4px 18px rgba(0,0,0,.6)}#top b{font-size:16px;text-shadow:0 0 8px rgba(216,203,168,.4)}
+.tl{flex-basis:100%;height:4px;background:#000}.tl i{display:block;height:100%;background:linear-gradient(90deg,var(--g),var(--b));transition:width .6s}
+.chips{margin:4px 0}.chips b{font:bold 11px Consolas,monospace;margin-right:6px;letter-spacing:1px}
+.chip{display:inline-block;margin:2px;padding:3px 8px;background:#2a3324;color:var(--w);border:1px solid var(--g);cursor:pointer;font:11px Consolas,monospace;transition:all .2s}
+.chip:hover{background:var(--g)}.chip.on{background:var(--b);color:#1a1d14;box-shadow:0 0 10px rgba(216,203,168,.5)}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:4px}.og button{margin:0}
+.stp{display:flex;gap:2px;margin-bottom:8px}.stp span{flex:1;text-align:center;font:9px Consolas,monospace;padding:3px 0;background:#b9ab80;color:#6b5f3c;border-bottom:3px solid transparent}
+.stp span.dn{background:#8fa070;color:#1c2616}.stp span.on{background:#2a3324;color:var(--b);border-bottom-color:var(--r);animation:pu 1.5s infinite}
+.gen{display:flex;gap:8px;align-items:center;margin-top:6px;padding:3px;border-left:3px solid transparent}.gen.cmd{border-left-color:var(--b);background:rgba(216,203,168,.07)}
+.av{width:30px;height:30px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font:bold 14px Consolas,monospace;background:#0d120b;flex:none}
+svg polygon{stroke:#0d0f0b;stroke-width:2;cursor:pointer}
+.sup{stroke:#d8cba8;stroke-dasharray:3 4;opacity:.5;animation:da 3s linear infinite}.atk{stroke:#f1e8cc;stroke-width:2.5;stroke-dasharray:6 4;animation:da .6s linear infinite}
+@keyframes nd{from{transform:rotate(var(--f))}}
+@media(max-width:800px){.og{grid-template-columns:1fr}}
+#tip{position:fixed;z-index:30;max-width:340px;background:#0d120b;border:1px solid var(--b);color:var(--w);padding:8px 10px;font:12px/1.45 system-ui,sans-serif;box-shadow:0 0 18px #000;display:none;pointer-events:none}
+#tip b{display:block;color:var(--b);font-family:Consolas,monospace;margin-bottom:3px}
+#hb{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);background:var(--b);color:#1a1d14;padding:4px 12px;font:bold 11px Consolas,monospace;z-index:25;display:none;box-shadow:0 0 12px rgba(216,203,168,.6);text-align:center}
+body.help #hb{display:block}
+body.help [data-h]{outline:1px dashed rgba(216,203,168,.75);outline-offset:1px;cursor:help}
+body.help [data-h]:hover{outline:2px solid #f1e8cc;background-color:rgba(216,203,168,.13)}
+body.help svg polygon[data-h]{filter:drop-shadow(0 0 3px #d8cba8)}
+
+#map{position:relative;height:clamp(300px,50vh,540px);background:#0a1218;overflow:hidden;border:1px solid #3d4d31;touch-action:none}
+#map canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+#map .cam{position:absolute;left:8px;top:8px;display:flex;gap:4px;flex-wrap:wrap;z-index:2;max-width:calc(100% - 60px)}
+#map .cam button{display:block;width:auto;margin:0;padding:4px 8px;font-size:11px;text-align:center;border-left-width:1px;background:rgba(13,15,11,.78)}
+#map .cam button:hover:not(:disabled){transform:none}
+#map .cam button.on{background:var(--b);color:#1a1d14}
+#cmp{position:absolute;right:10px;top:10px;width:36px;height:36px;border:1px solid var(--g);border-radius:50%;background:rgba(13,15,11,.7);z-index:2;pointer-events:none}
+#cmp i{position:absolute;left:50%;top:3px;margin-left:-5px;border:5px solid transparent;border-bottom:13px solid var(--r);border-top:0}
+#cmp b{position:absolute;left:0;right:0;bottom:3px;text-align:center;font:bold 10px Consolas,monospace;color:var(--b)}
+#map .fb{position:absolute;inset:0;overflow:auto;padding:46px 10px 10px;background:#0a1218;z-index:1}
+#map .fb button{display:inline-block;width:auto;margin:3px}
+</style></head><body>
+<div id="toast"></div><div id="tip"></div><div id="hb">MODO AYUDA: pasa el cursor sobre cualquier elemento resaltado · pulsa AYUDA para salir</div>
+<div id="menu" class="ov"><h1 class="glitch" data-t="LARPING HITLER">LARPING HITLER</h1><p class="m">MILITARY STRATEGY SIMULATOR</p><small>Sátira sobre la incompetencia y el autoritarismo. Régimen y mapa ficticios.</small>
+<button onclick="show('dif')">NEW GAME</button><button id="cont" onclick="loadGame()">CONTINUE</button><button onclick="deleteSave()">DELETE SAVE</button><button onclick="show('set')">SETTINGS</button><button onclick="show('cred')">CREDITS</button></div>
+<div id="set" class="ov" style="display:none"><h1>SETTINGS</h1><button id="animb" onclick="setAnim()"></button><button onclick="show('menu')">VOLVER</button></div>
+<div id="cred" class="ov" style="display:none"><h1>CREDITS</h1><p>Sátira sobre la incompetencia y el autoritarismo. Régimen, generales y mapa ficticios.<br>No glorifica el nazismo ni trivializa a sus víctimas.</p><button onclick="show('menu')">VOLVER</button></div>
+<div id="pause" class="ov" style="display:none"><h1>PAUSA</h1><button onclick="show('app')">REANUDAR</button><button onclick="saveGame();note('Guardado')">GUARDAR</button><button onclick="show('menu')">MENÚ</button></div>
+<div id="dif" class="ov" style="display:none"><h1>DIFICULTAD</h1>
+<button onclick="start('easy')">EASY — ARMCHAIR GENERAL</button><button onclick="start('normal')">NORMAL — FIELD MARSHAL</button><button onclick="start('hard')">HARD — MILITARY GENIUS</button><button onclick="show('menu')">VOLVER</button></div>
+<div id="end" class="ov" style="display:none"></div>
+<div id="app" style="display:none">
+<div id="top" class="p"></div><div id="left" class="p"></div>
+<div><div class="p"><div id="map" data-h="Mapa estratégico 3D§Mapa ficticio de 8 territorios.">
+<div class="cam"><button data-v="iso" onclick="view3d('iso')" data-h="Vista isométrica§Cámara inclinada con perspectiva (por defecto).">ISO</button><button data-v="tac" onclick="view3d('tac')" data-h="Vista táctica§Cámara cenital, como un mapa de estado mayor.">TÁCTICA</button><button data-v="low" onclick="view3d('low')" data-h="Vista rasante§Cámara baja para ver las unidades de cerca.">RASANTE</button><button data-v="auto" onclick="auto3d()" data-h="Rotación automática§Gira la cámara alrededor del frente.">⟳ GIRAR</button></div>
+<div id="cmp"><i></i><b>N</b></div></div><div id="info" class="m"></div></div><div id="main" class="p" style="margin-top:6px"></div></div>
+<div id="right" class="p"></div><div id="log" class="p m"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// CONFIGURACIÓN
+const $=s=>document.querySelector(s),cl=(v,a=0,b=100)=>Math.max(a,Math.min(b,v)),rnd=(a,b)=>a+Math.random()*(b-a);
+const KEY='lh_save_v1';
+const DIF={easy:{n:'ARMCHAIR GENERAL',res:1.3,en:.8,sus:.7,q:1},normal:{n:'FIELD MARSHAL',res:1,en:1,sus:1,q:2},hard:{n:'MILITARY GENIUS',res:.7,en:1.25,sus:1.4,q:3}};
+const TER=[['Norgard',40],['Valmark',45],['Eisenau',50],['Rotburg',55],['Kaldheim',45],['Sturmfeld',60],['Brennow',75],['Hauptstadt Este',85]];
+const K={credibility:'player',larperLevel:'player',prestige:'player',manpower:'army',morale:'army',equipment:'army',fuel:'resources',ammunition:'resources',food:'resources',industry:'resources',stability:'politics',loyalty:'politics'};
+const A={attack:{d:'Conquistar el territorio enemigo seleccionado (adyacente).',c:{fuel:15,ammunition:15}},defend:{d:'Fortificar: +moral y mejor defensa ante el contraataque.',c:{food:10}},retreat:{d:'Evitar bajas; 40% de ceder terreno; -moral.',c:{}},reinforce:{d:'+1500 tropas y +8 equipo.',c:{industry:20}},resupply:{d:'+20 combustible, +20 munición, +15 comida.',c:{industry:15}},intelligence:{d:'+15% de poder en el próximo ataque.',c:{fuel:5,industry:5}}};
+const DL={aggressive:['Más ofensivas y hoy ha acertado.','¿Eso era una estrategia o un accidente?'],defensive:['Prudente, por una vez.','Perdemos terreno y usted sonríe.'],ambitious:['Admirable... tomo nota.','Quizá el mando necesite a alguien capaz.'],loyal:['Siempre a sus órdenes... aunque cueste.','Le sigo, pero ya me cuesta.'],strategic:['Casualidad estadística, pero la acepto.','Su plan viola tres principios básicos.'],cowardly:['¿Ve? Nadie ha muerto... mucho.','Nos va a matar a todos, mi líder.']};
+// PREGUNTAS [texto,[resp],correcta,explicación,dificultad]
+const Q=[
+["¿En qué año comenzó la Segunda Guerra Mundial en Europa?",["1937","1939","1941","1943"],1,"Con la invasión alemana de Polonia en septiembre de 1939.",1],
+["¿En qué región desembarcaron los Aliados el 6 de junio de 1944?",["Calais","Normandía","Bretaña","Provenza"],1,"Fue la Operación Overlord (Día D) en Normandía.",1],
+["¿Junto a qué río se libró la batalla de Stalingrado?",["Don","Dniéper","Volga","Neva"],2,"Stalingrado (hoy Volgogrado) está a orillas del Volga.",1],
+["¿En qué fecha atacó Japón Pearl Harbor?",["7 dic 1941","7 dic 1942","1 sep 1939","6 jun 1944"],0,"El ataque fue el 7 de diciembre de 1941.",1],
+["¿Qué país fabricaba el caza Spitfire?",["EE. UU.","Francia","Alemania","Reino Unido"],3,"El Supermarine Spitfire fue británico.",1],
+["¿Cómo se llamó la invasión alemana de la URSS en 1941?",["Barbarroja","Overlord","Sealion","Torch"],0,"Operación Barbarroja, iniciada el 22 de junio de 1941.",1],
+["¿Quién era primer ministro británico en 1940?",["Chamberlain (todo el año)","Attlee","Churchill","Eden"],2,"Churchill sustituyó a Chamberlain en mayo de 1940.",1],
+["¿Qué tanque soviético fue célebre en la guerra?",["Sherman","T-34","Panther","Churchill"],1,"El T-34 fue clave para el Ejército Rojo.",2],
+["¿Dónde se libró la batalla naval de Midway?",["Atlántico Norte","Mediterráneo","Pacífico","Índico"],2,"En el Pacífico, en junio de 1942, con victoria estadounidense.",2],
+["¿Qué línea defensiva francesa fue rodeada en 1940?",["Línea Maginot","Línea Sigfrido","Línea Mannerheim","Muro Atlántico"],0,"La Línea Maginot fue evitada por las fuerzas alemanas.",2],
+["¿Qué evacuación de tropas aliadas ocurrió en 1940?",["Anzio","Dunkerque","Creta","Dieppe"],1,"Dunkerque: unos 330.000 soldados evacuados.",2],
+["¿En qué país se libró la batalla de El Alamein?",["Libia","Túnez","Egipto","Argelia"],2,"El Alamein está en Egipto (1942).",2],
+["¿Qué tres líderes se reunieron en Yalta en 1945?",["Churchill, Roosevelt, Stalin","Hitler, Mussolini, Hirohito","De Gaulle, Truman, Mao","Attlee, Eisenhower, Tito"],0,"Roosevelt, Churchill y Stalin.",2],
+["¿Qué ciudad japonesa sufrió el primer ataque atómico (6 ago 1945)?",["Nagasaki","Kioto","Hiroshima","Osaka"],2,"Hiroshima, el 6 de agosto de 1945.",2],
+["¿Qué acorazado alemán fue hundido en mayo de 1941?",["Tirpitz","Bismarck","Scharnhorst","Graf Spee"],1,"El Bismarck fue hundido tras la persecución en el Atlántico.",3],
+["¿Dónde se libró la batalla de tanques de Kursk (1943)?",["Frente oriental","Italia","Normandía","Birmania"],0,"Kursk, en el frente oriental, en julio de 1943.",3],
+["¿Cómo se llamó la ofensiva alemana de diciembre de 1944 en las Ardenas?",["Operación Market Garden","Batalla de las Ardenas (Bulge)","Operación Dragoon","Operación Cobra"],1,"Fue la batalla de las Ardenas (Bulge).",3],
+["¿En qué mes de 1945 terminó la guerra en Europa?",["Enero","Marzo","Mayo","Septiembre"],2,"Alemania se rindió en mayo de 1945.",3]];
+const EV=[
+{t:'GENERAL INSUBORDINADO',d:'Un general cuestiona sus últimas decisiones en público.',o:[['Ignorarlo',{larperLevel:6,loyalty:-5}],['Escuchar sus recomendaciones',{credibility:3,prestige:-5,larperLevel:-3}],['Apartarlo del mando',{stability:-8,loyalty:-8,prestige:3}]]},
+{t:'CRISIS DE COMBUSTIBLE',d:'Los suministros no llegan al frente.',o:[['Reducir operaciones',{morale:-3,fuel:8}],['Priorizar abastecimiento',{industry:-10,fuel:20}],['Reasignar reservas',{ammunition:-10,fuel:15}]]},
+{t:'INFORMACIÓN FALSA',d:'La inteligencia aporta un informe dudoso.',o:[['Confiar en el informe',{morale:-8,ammunition:-8,larperLevel:5}],['Pedir segunda evaluación',{industry:-5,credibility:3}],['Ignorarlo',{larperLevel:2}]]},
+{t:'HUELGA INDUSTRIAL',d:'Las fábricas paran por los salarios.',o:[['Negociar',{industry:-5,stability:4}],['Reprimir',{stability:-8,industry:8,loyalty:-3}]]},
+{t:'DESFILE MILITAR',d:'Propone un gran desfile para elevar el ánimo.',o:[['Celebrarlo',{prestige:8,food:-8,stability:4}],['Cancelarlo',{food:5,prestige:-3}]]},
+{t:'PERIODISTA CURIOSO',d:'Un reportero pregunta por su "brillante estrategia".',o:[['Negar todo',{larperLevel:4,credibility:-3}],['Conceder una entrevista',{credibility:4,prestige:3,larperLevel:2}],['Censurarlo',{stability:-4,larperLevel:-2}]]},
+{t:'ESPÍAS EN EL ESTADO MAYOR',d:'Se sospecha de filtraciones al enemigo.',o:[['Ordenar una redada',{stability:-4,larperLevel:-3}],['Ignorarlo',{ammunition:-6}]]},
+{t:'TORMENTA DE NIEVE',d:'El frente queda bloqueado por el clima.',o:[['Esperar',{morale:-3,food:-4}],['Avanzar igualmente',{equipment:-6,morale:2}]]},
+{t:'DESERCIONES',d:'Soldados abandonan sus puestos.',o:[['Amnistía',{morale:3,loyalty:-3}],['Castigos duros',{morale:-5,stability:-3}]]},
+{t:'UN ALIADO PIDE AYUDA',d:'Un aliado solicita munición urgente.',o:[['Enviarla',{ammunition:-10,prestige:6}],['Negarse',{prestige:-5,loyalty:2}]]},
+{t:'MERCADO NEGRO',d:'Florece el comercio ilegal de alimentos.',o:[['Aplastarlo',{industry:-5,stability:3}],['Tolerarlo',{food:8,stability:-3}]]},
+{t:'EL MAPA AL REVÉS',d:'Descubren que llevaba el mapa estratégico boca abajo.',o:[['Culpar a un subordinado',{larperLevel:5,loyalty:-4}],['Admitir el error',{credibility:-3,larperLevel:-2,loyalty:2}],['Declarar una "nueva doctrina"',{larperLevel:4,prestige:3}]]},
+{t:'VISITA DE INSPECCIÓN',d:'Observadores quieren ver el frente.',o:[['Mostrar la realidad',{morale:3,fuel:-6}],['Maquillar los informes',{larperLevel:5,prestige:4}]]},
+{t:'SABOTAJE EN LA FÁBRICA',d:'Una planta clave sufre un incendio.',o:[['Reconstruirla',{industry:-6,stability:2}],['Priorizar la defensa',{industry:-12,loyalty:2}]]},
+{t:'RUMOR DE GOLPE',d:'Circulan rumores de conspiración.',o:[['Purgar sospechosos',{loyalty:-6,stability:-4,larperLevel:-3}],['Reunirse con los generales',{loyalty:5,prestige:-3}],['Ignorarlo',{larperLevel:4}]]}];
+const ENDS={larper:['CERTIFIED LARPER',0,'Los generales le arrancan el uniforme de cartón en directo. El régimen colapsa entre carcajadas y actas notariales.'],coup:["COUP D'ÉTAT",0,'Los generales deciden que cualquiera lo haría mejor. Tienen razón.'],collapse:['MILITARY COLLAPSE',0,'El ejército ya no puede operar. Sus mapas siguen siendo preciosos.'],defeat:['TOTAL DEFEAT',0,'No queda ni un territorio. Queda el cargo de "genio militar" en su tarjeta.'],genius:['STRATEGIC GENIUS',1,'Todos los objetivos cumplidos. Nadie lo entiende, usted tampoco.'],manip:['MASTER MANIPULATOR',1,'Mantuvo el control político toda la campaña. Competencia militar: opcional.'],reluctant:['RELUCTANT COMMANDER',1,'Sobrevivió con recursos mínimos y mucha suerte.']};
+// ESTADO GLOBAL
+let G=null;
+const mine=()=>G.own.filter(x=>x).length;
+const nbrs=i=>{const c=i%4;return[i-4,i+4,c>0?i-1:-1,c<3?i+1:-1].filter(j=>j>=0&&j<8)};
+const adj=i=>nbrs(i).some(j=>G.own[j]);
+function newGame(d){const D=DIF[d],r=Math.min(100,Math.round(80*D.res));
+return{v:1,turn:1,diff:d,phase:'brief',status:'playing',player:{credibility:100,larperLevel:0,prestige:50},army:{manpower:10000,morale:100,equipment:100},resources:{fuel:r,ammunition:r,food:r,industry:r},politics:{stability:100,loyalty:100},own:[1,1,0,0,1,0,0,0],plan:'bal',cmd:0,rh:[],sel:null,intel:false,def:false,ret:false,q:0,fb:null,ev:0,rep:'',rep2:'',last:'none',history:[],used:[],
+gens:[['Gen. von Falken','aggressive',75,85,20],['Gen. Brandt','defensive',70,70,15],['Gen. Kessler','ambitious',55,75,30],['Gen. Hoffmann','cowardly',60,55,25],['Gen. Müller','loyal',90,60,10],['Gen. Rhein','strategic',65,90,25]].map((g,i)=>({id:i,name:g[0],personality:g[1],loyalty:g[2],competence:g[3],suspicion:Math.round(g[4]*D.sus),active:true}))}}
+function st(k,d){const g=K[k];G[g][k]=cl(Math.round(G[g][k]+d),0,k=='manpower'?20000:100)}
+function apply(e){for(const k in e)st(k,e[k])}
+function log(t){G.history.unshift('T'+G.turn+': '+t);G.history=G.history.slice(0,40)}
+function note(t){const e=$('#toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2500)}
+// PREGUNTAS
+function getRandomQuestion(){const m=Math.min(3,DIF[G.diff].q+(G.turn>6?1:0));let p=Q.map((q,i)=>i).filter(i=>!G.used.includes(i)&&Q[i][4]<=m);if(!p.length){G.used=[];p=Q.map((q,i)=>i).filter(i=>Q[i][4]<=m)}const i=p[Math.floor(Math.random()*p.length)];G.used.push(i);return i}
+function ans(i){if(G.phase!='question'||G.fb)return;const q=Q[G.q],ok=i==q[2],s=DIF[G.diff].sus;
+if(ok){apply({credibility:4,larperLevel:-4,prestige:1})}else apply({larperLevel:Math.round(8*s),credibility:-3});
+G.fb=(ok?'✔ CORRECTO. ':'✖ INCORRECTO. ')+q[3];log(ok?'Pregunta acertada':'Pregunta fallada');save();render()}
+// RECURSOS Y ÓRDENES
+function why(k){for(const r in A[k].c)if(G.resources[r]<A[k].c[r])return'falta '+r;
+if(k=='attack'&&(G.sel==null||G.own[G.sel]||!adj(G.sel)))return'selecciona un territorio enemigo adyacente';return''}
+function atkPow(){const g=G.gens[G.cmd],au=rep()>=60?1.1:rep()<20?.9:1;return atk0()*PL[G.plan].a*(1+g.competence/1000+(g.personality=='aggressive'?.08:0))*au}
+function atk0(){const a=G.army;return a.manpower/200*(.5+a.morale/200)*(.5+a.equipment/200)*(G.resources.food>20?1:.7)*(G.intel?1.15:1)}
+function defPow(i){return TER[i][1]*DIF[G.diff].en*(1+G.turn*.04)}
+function order(k){if(G.phase!='strategy'||why(k))return;for(const r in A[k].c)st(r,-A[k].c[r]);const D=DIF[G.diff];let h='<h3>INFORME DE BATALLA</h3>';G.last='none';
+if(k=='attack'){const T=TER[G.sel],r=atkPow()*rnd(.9,1.1),d=defPow(G.sel)*rnd(.9,1.1),win=r>=d;G.intel=false;
+if(win){const loss=Math.round(d*rnd(20,35)*PL[G.plan].c);G.own[G.sel]=1;apply({manpower:-loss,morale:8,prestige:5,larperLevel:-4});G.last='win';h+=`<p>VICTORIA en ${T[0]}. Bajas: ${loss}. Moral +8. LARPER -4.</p>`}
+else{const loss=Math.round(r*rnd(25,40)*PL[G.plan].c);apply({manpower:-loss,morale:-12,equipment:-6,larperLevel:Math.round(6*D.sus)});G.last='lose';h+=`<p>DERROTA en ${T[0]}. Bajas: ${loss}. Moral -12. LARPER +${Math.round(6*D.sus)}.</p>`}}
+if(k=='defend'){apply({morale:5});G.def=true;h+='<p>Posiciones fortificadas. Moral +5.</p>'}
+if(k=='retreat'){apply({morale:-4,larperLevel:3});G.ret=true;h+='<p>Repliegue ordenado. Moral -4.</p>'}
+if(k=='reinforce'){apply({manpower:1500,equipment:8});h+='<p>Refuerzos: +1500 tropas, +8 equipo.</p>'}
+if(k=='resupply'){apply({fuel:20,ammunition:20,food:15});h+='<p>Suministros repuestos.</p>'}
+if(k=='intelligence'){G.intel=true;h+='<p>Inteligencia obtenida: +15% de poder en el próximo ataque.</p>'}
+{const g=G.gens[G.cmd];if(REC[g.personality]==k){g.loyalty=cl(g.loyalty+3);g.suspicion=cl(g.suspicion-3);apply({larperLevel:-2});h+=`<p>${g.name} aprueba la orden: lealtad +3, sospecha -3.</p>`}else{g.suspicion=cl(g.suspicion+2);h+=`<p>${g.name} proponía otra cosa: sospecha +2.</p>`}}h+=counter();log(k.toUpperCase());G.sel=null;G.rep=h;G.phase='report';save();render()}
+function counter(){const b=G.own.map((o,i)=>o&&nbrs(i).some(j=>!G.own[j])?i:-1).filter(i=>i>=0);if(!b.length)return'';const i=b[Math.floor(Math.random()*b.length)],D=DIF[G.diff];let t;
+if(G.ret){if(Math.random()<.4){G.own[i]=0;apply({morale:-5});t=`El enemigo ocupa ${TER[i][0]} tras el repliegue.`}else t='El enemigo no avanza.'}
+else{const e=24*D.en*(1+G.turn*.05)*rnd(.8,1.2),d=(G.army.manpower/250)*(.5+G.army.morale/200)*(G.def?1.6:1)*PL[G.plan].d*(G.gens[G.cmd].personality=='defensive'?1.2:1)+TER[i][1]*.3;
+if(e>d){G.own[i]=0;apply({manpower:-600,morale:-5});t=`CONTRAATAQUE: se pierde ${TER[i][0]}. Bajas: 600.`;if(G.last!='win')G.last='lose'}else t=`Contraataque rechazado en ${TER[i][0]}.`}
+G.def=false;G.ret=false;return'<p>'+t+'</p>'}
+// EVENTOS
+function choose(i){if(G.phase!='event')return;const o=EV[G.ev].o[i];apply(o[1]);log(EV[G.ev].t+': '+o[0]);react();const c=check();if(c){end(c);return}G.phase='react';save();render()}
+// GENERALES Y TURNO
+function react(){const P=G.player,s=DIF[G.diff].sus;let t='<h3>REACCIONES</h3>';
+G.gens.forEach(g=>{if(G.last=='win'){g.loyalty+=3;g.suspicion-=3}else if(G.last=='lose'){g.loyalty-=3;g.suspicion+=6*s;if(g.personality=='ambitious')g.suspicion+=3}if(P.larperLevel>60)g.suspicion+=4;g.loyalty=cl(g.loyalty);g.suspicion=cl(Math.round(g.suspicion))});
+if(G.last!='none'){const a=[...G.gens].sort((x,y)=>y.suspicion-x.suspicion)[0];t+=`<p>${a.name}: "${DL[a.personality][G.last=='win'?0:1]}"</p>`}
+if(P.credibility<50)apply({larperLevel:3});apply({credibility:-Math.floor(P.larperLevel/25)});
+const R=G.resources,D=DIF[G.diff],f=G.politics.stability/100*D.res;
+if(R.food<20){apply({morale:-5});t+='<p>Escasez de comida: moral -5.</p>'}if(R.fuel<=0){apply({equipment:-3});t+='<p>Sin combustible: equipo -3.</p>'}
+const pr=Math.round(8*f*(G.resources.industry/100+.3)*(G.player.prestige>=70?1.15:1));apply({fuel:pr,ammunition:pr,food:Math.round(pr*.8)});t+=`<p>Producción: +${pr} combustible y munición.</p>`;
+if(G.last=='win')apply({loyalty:2});if(G.last=='lose')apply({stability:-3});G.rep2=t}
+function check(){const a=G.army,P=G.player;if(P.larperLevel>=100)return'larper';
+const av=G.gens.reduce((s,g)=>s+g.loyalty,0)/G.gens.length;if((G.gens.some(g=>g.suspicion>=90)||av<25)&&Math.random()<.5)return'coup';
+if(a.manpower<=1000||a.morale<=0)return'collapse';if(mine()==0)return'defeat';if(mine()==8)return'genius';
+if(G.turn>=12)return G.politics.stability>=70&&G.politics.loyalty>=60?'manip':'reluctant';return null}
+function next(){const p=G.phase;if(G.status!='playing')return;
+if(p=='brief'){G.q=getRandomQuestion();G.fb=null;G.phase='question'}
+else if(p=='question'&&G.fb)G.phase='strategy';
+else if(p=='report'){G.ev=Math.floor(Math.random()*EV.length);G.phase='event'}
+else if(p=='react'){G.rh.push([G.player.credibility,G.player.larperLevel,G.player.prestige]);G.turn++;G.phase='brief'}
+save();render()}
+function end(c){G.status='over';const e=ENDS[c];deleteSave(1);$('#end').innerHTML=`<h1 style="color:${e[1]?'#8fbf6a':'#c0392b'}">${e[0]}</h1><p>${e[2]}</p><p class=m>Turno ${G.turn} · Territorios ${mine()}/8 · Tropas ${G.army.manpower} · LARPER ${G.player.larperLevel} · Credibilidad ${G.player.credibility}<br>Dificultad: ${DIF[G.diff].n}</p><button onclick="show('menu')">MENÚ PRINCIPAL</button>`;show('end')}
+// GUARDADO
+function saveGame(){try{localStorage.setItem(KEY,JSON.stringify(G))}catch(e){note('No se pudo guardar la partida (almacenamiento lleno o bloqueado)')}}
+function save(){if(G&&G.status=='playing')saveGame()}
+function hasSavedGame(){return!!localStorage.getItem(KEY)}
+function loadGame(){try{const d=JSON.parse(localStorage.getItem(KEY));if(!d||(d.v!=1&&d.v!=2)||!d.own||!d.gens||!DIF[d.diff])throw 0;G=d;migrate();G.plan=G.plan||'bal';G.cmd=G.cmd||0;G.rh=G.rh||[];PV=[];PO=null;LP=null;PA=null;show('app');render()}catch(e){deleteSave(1);note('Partida corrupta o ausente');show('menu')}}
+function deleteSave(q){try{localStorage.removeItem(KEY)}catch(e){}if(!q)note('Partida borrada');$('#cont').disabled=true}
+// INTERFAZ
+function show(id){['menu','dif','end','app','set','cred','pause'].forEach(x=>$('#'+x).style.display=x==id?(x=='app'?'grid':'flex'):'none');if(id=='menu')$('#cont').disabled=!hasSavedGame()}
+function start(d){PV=[];PO=null;LP=null;PA=null;G=newGame(d);saveGame();show('app');render()}
+function selT(i){if(G.phase!='strategy')return;G.sel=i;render()}
+let bi=0,PV=[],PO=null,LP=null,PA=null;
+const PL={agr:{n:'Ofensiva a ultranza',a:1.25,c:1.4,d:.85},bal:{n:'Equilibrada',a:1,c:1,d:1},cau:{n:'Cautelosa',a:.85,c:.6,d:1.2}};
+const REC={aggressive:'attack',defensive:'defend',cowardly:'retreat',strategic:'intelligence',ambitious:'reinforce',loyal:'resupply'};
+const IC={attack:'⚔',defend:'🛡',retreat:'↩',reinforce:'➕',resupply:'📦',intelligence:'🔍'};
+const PHS=['brief','question','strategy','report','event','react'],PHL=['BRIEFING','PREGUNTA','ÓRDENES','BATALLA','EVENTO','REACCIONES'];
+const stp=p=>'<div class=stp>'+PHS.map((x,i)=>`<span class="${x==p?'on':PHS.indexOf(p)>i?'dn':''}">${PHL[i]}</span>`).join('')+'</div>';
+const rep=()=>Math.round(G.player.credibility*.5+G.player.prestige*.5-G.player.larperLevel*.4);
+function setPlan(k){if(G.phase=='strategy'){G.plan=k;render()}}
+function setCmd(i){if(G.phase=='strategy'){G.cmd=i;render()}}
+const bar=(l,v,m,c)=>{const k=bi++,mm=m||100,o=PV[k]==null?v:PV[k],x=o!=v?(v>o?'up':'dn'):'';PV[k]=v;return`<div class=row><span>${l}</span><span>${v}</span></div><div class="bar ${c||''} ${x}"><i style="width:${v/mm*100}%;--f:${o/mm*100}%"></i></div>`};
+const LV=l=>l>=100?'EXPOSED':l>80?'TOTAL FRAUD':l>60?'CERTIFIED IMPOSTOR':l>40?'ARMCHAIR GENERAL':l>20?'SLIGHTLY SUSPICIOUS':'RESPECTED LEADER';
+function render(){if(!G)return;bi=0;const P=G.player,a=G.army,R=G.resources;
+$('#top').innerHTML=`<b class=m>REPÚBLICA DE PAPELSTAAT</b><span>Mes ${G.turn}/12</span><span>${DIF[G.diff].n}</span><span>Fase: ${G.phase.toUpperCase()}</span><button style="width:auto" onclick="toggleHelp()">❓ AYUDA${HLP?': ON':''}</button><button style="width:auto" onclick="show('pause')">PAUSA</button><button style="width:auto" onclick="saveGame();note('Guardado')">GUARDAR</button><button style="width:auto" onclick="show('menu')">MENÚ</button><div class="tl"><i style="width:${G.turn/12*100}%"></i></div>`;
+$('#left').innerHTML='<h3>GENERALES</h3>'+G.gens.map(g=>`<div class="gen ${G.gens[G.cmd]==g?'cmd':''}"><span class="av" style="border-color:${g.suspicion>60?'#c0392b':g.loyalty>60?'#6aa84f':'#d8cba8'}">${g.name.replace('Gen. ','')[0]}</span><div><b>${g.name}</b><br><small>${g.personality}${G.gens[G.cmd]==g?' · al mando':''}</small></div></div>${bar('Lealtad',g.loyalty)}${bar('Sospecha',g.suspicion,100,'r')}`).join('')+'<h3>EJÉRCITO</h3>'+bar('Tropas',a.manpower,20000)+bar('Moral',a.morale)+bar('Equipo',a.equipment);
+const sc=rep(),rk=sc>=80?'GENIO INDISCUTIBLE':sc>=60?'ESTRATEGA ADMIRADO':sc>=40?'MANDO RESPETADO':sc>=20?'AFICIONADO':'FANTOCHE',ang=-90+P.larperLevel*1.8,pa=PA==null?ang:PA;PA=ang;
+const rh=G.rh||[],sp=(k,c)=>rh.length>1?`<polyline fill=none stroke="${c}" stroke-width="1.5" points="${rh.map((q,n)=>(n/(rh.length-1)*110).toFixed(1)+','+(30-q[k]*.28).toFixed(1)).join(' ')}"/>`:'';
+$('#right').innerHTML=`<h3>LARPER LEVEL</h3><svg viewBox="0 0 120 72" width="100%"><defs><linearGradient id="gg"><stop offset="0" stop-color="#6aa84f"/><stop offset=".5" stop-color="#e0b341"/><stop offset="1" stop-color="#c0392b"/></linearGradient></defs><path d="M10 62A50 50 0 0 1 110 62" fill=none stroke="#000" stroke-width="10"/><path d="M10 62A50 50 0 0 1 110 62" fill=none stroke="url(#gg)" stroke-width="7"/><line x1="60" y1="62" x2="60" y2="20" stroke="#ece6d4" stroke-width="2.5" style="transform-origin:60px 62px;transform:rotate(${ang}deg);--f:${pa}deg;animation:nd .9s ease-out"/><circle cx="60" cy="62" r="4" fill="#ece6d4"/></svg><div class="m ${P.larperLevel>60?'alert':''}" style="text-align:center;color:${P.larperLevel>60?'#e74c3c':'#d8cba8'}"><b style="font-size:18px">${P.larperLevel}</b> · ${LV(P.larperLevel)}</div><h3>REPUTACIÓN</h3><div class="m" style="text-align:center"><b>${rk}</b><br><small>Índice ${sc}${sc>=60?' · aura de genio: +10% ataque':sc<20?' · nadie te sigue: -10% ataque':''}${P.prestige>=70?' · prestigio: +15% producción':''}</small></div>`+bar('🎖 Credibilidad',P.credibility)+bar('★ Prestigio',P.prestige)+`<svg viewBox="0 0 110 32" width="100%" style="background:#0d120b">${sp(0,'#8fbf6a')}${sp(1,'#c0392b')}${sp(2,'#d8cba8')}</svg><small class=m>verde credib. · rojo larper · beige prestigio</small><h3>RECURSOS</h3>`+bar('⛽ Combustible',R.fuel)+bar('🔫 Munición',R.ammunition)+bar('🍞 Comida',R.food)+bar('🏭 Industria',R.industry)+'<h3>POLÍTICA</h3>'+bar('Estabilidad',G.politics.stability)+bar('Lealtad',G.politics.loyalty);
+const mn=Math.round(a.manpower/Math.max(1,mine())),V=(r,c)=>[c*100+((c*37+r*91)%17)-8,r*100+((c*53+r*29)%15)-7],pts=i=>{const r=Math.floor(i/4),c=i%4;return[V(r,c),V(r,c+1),V(r+1,c+1),V(r+1,c)]},ct=i=>{const q=pts(i);return[q.reduce((u,z)=>u+z[0],0)/4,q.reduce((u,z)=>u+z[1],0)/4]};
+map3d(mn);PO=G.own.slice();
+const s=G.sel;$('#info').innerHTML=s==null?'Selecciona un territorio (clic). Arrastra para rotar, rueda para zoom, clic derecho para desplazar.':`${TER[s][0]} · ${G.own[s]?'controlado':'enemigo'} · defensa ${TER[s][1]} · importancia ${'★'.repeat(Math.ceil(TER[s][1]/25))}${!G.own[s]&&adj(s)?` · éxito estimado ~${Math.round(100/(1+Math.exp((defPow(s)-atkPow())/6)))}%`:''}`;
+let h='',p=G.phase;
+if(p=='brief')h=`<h3>BRIEFING · MES ${G.turn}</h3><p>Territorios: ${mine()}/8. Tropas: ${a.manpower}. ${G.intel?'Inteligencia activa.':''}</p><button onclick="next()">Recibir pregunta del Estado Mayor</button>`;
+else if(p=='question'){const q=Q[G.q];h=`<h3>PREGUNTA DE HISTORIA</h3><p>${q[0]}</p>`+(G.fb?`<p>${G.fb}</p><button onclick="next()">Continuar a órdenes</button>`:q[1].map((x,i)=>`<button onclick="ans(${i})">${x}</button>`).join(''))}
+else if(p=='strategy'){const g=G.gens[G.cmd],ok=G.sel!=null&&!G.own[G.sel]&&adj(G.sel),od=ok?Math.round(100/(1+Math.exp((defPow(G.sel)-atkPow())/6))):null;
+h='<h3>ÓRDENES</h3><div class=chips><b>Doctrina</b>'+Object.keys(PL).map(k=>`<span class="chip ${G.plan==k?'on':''}" onclick="setPlan('${k}')" title="Poder x${PL[k].a} · bajas x${PL[k].c} · defensa x${PL[k].d}">${PL[k].n}</span>`).join('')+'</div><div class=chips><b>Comandante</b>'+G.gens.map((x,i)=>`<span class="chip ${G.cmd==i?'on':''}" onclick="setCmd(${i})">${x.name.replace('Gen. ','')}</span>`).join('')+`</div><p class=m><small>${g.name} (${g.personality}, comp. ${g.competence}) recomienda <b>${REC[g.personality].toUpperCase()}</b>.${od!=null?' Éxito estimado '+od+'%.':''}</small></p><div class=og>`+Object.keys(A).map(k=>{const w=why(k);return`<button ${w?'disabled':''} onclick="order('${k}')">${IC[k]} <b>${k.toUpperCase()}</b>${REC[g.personality]==k?' ★':''}${k=='attack'&&od!=null?' · ~'+od+'%':''}<br><small>${A[k].d}<br>Coste: ${JSON.stringify(A[k].c)}${w?' · ✖ '+w:''}</small></button>`}).join('')+'</div>'}
+else if(p=='report')h=`<div class="rp ${G.last}">`+G.rep+'</div><button onclick="next()">Continuar</button>';
+else if(p=='event'){const e=EV[G.ev];h=`<h3>EVENTO: ${e.t}</h3><p>${e.d}</p>`+e.o.map((o,i)=>`<button onclick="choose(${i})">${o[0]}</button>`).join('')}
+else if(p=='react')h=G.rep2+'<button onclick="next()">Siguiente turno</button>';
+const m=$('#main');m.dataset.ph=p;m.innerHTML=stp(p)+h;if(p!=LP){m.classList.remove('fx');void m.offsetWidth;m.classList.add('fx');if(p=='report'&&G.last=='lose'){const ap=$('#app');ap.classList.add('shk');setTimeout(()=>ap.classList.remove('shk'),600)}LP=p;setTimeout(()=>m.classList.remove('fx'),900)}document.body.classList.toggle('warn',P.larperLevel>60);$('#log').innerHTML='<h3>HISTORIAL</h3>'+G.history.join('<br>');applyHelp()}
+// EVENTOS EXTRA (formato: título|descripción|opción;efectos|...) L=larper C=credib. P=prestigio M=moral E=equipo T=tropas F=comb. A=munición B=comida I=industria S=estabilidad Y=lealtad
+const FK={L:'larperLevel',C:'credibility',P:'prestige',M:'morale',E:'equipment',T:'manpower',F:'fuel',A:'ammunition',B:'food',I:'industry',S:'stability',Y:'loyalty'};
+`EL GENERAL EXIGE UN ASCENSO|Un general pide más estrellas por "motivos de mapa".|Concederlo;Y4,P-3,S-2|Negarlo;Y-5,L2|Medalla de latón;P2,Y2,I-3
+EXPERTO EN HISTORIA|Un profesor ofrece asesorar al Estado Mayor.|Aceptarlo;C4,L-4,P-2|Encarcelarlo;S-4,L3|Fingir que ya lo sabía;L4,C-2
+EL CAFÉ SE ACABÓ|La moral del cuartel cae sin café.|Importar café;I-6,M5|Prohibir el café;M-6,S-2|Racionarlo;M-1,B-2
+ERROR DE IMPRENTA|Los mapas oficiales imprimen ríos donde no hay.|Reimprimir;I-8,C2|Aceptar los ríos;L5,E-3|Ordenar que los ríos existan;L6,P2
+PERRO MASCOTA|Una unidad adopta un perro y sube la moral.|Adoptarlo oficialmente;M6,P-1|Prohibirlo;M-5|Nombrarlo coronel;M8,L3
+MALA TRADUCCIÓN|Un tratado con un aliado se traduce mal.|Renegociar;P-2,S-2,C2|Culpar al traductor;L4,Y-2|Aprovecharlo;P4,L3
+DISCURSO INTERMINABLE|Su discurso dura 6 horas y los soldados duermen.|Prolongarlo;M-5,P2|Acortarlo;M3,P-1|Repartir café;M4,B-4
+INFORME DE BAJAS|El informe de bajas está teñido de optimismo.|Corregirlo;C3,M-3|Publicarlo;L5,S3|Archivarlo;L2,Y-2
+BLOQUEO NAVAL|Un bloqueo corta los suministros marítimos.|Romper el bloqueo;F-10,A-10,P4|Rutas terrestres;I-6,B6|Esperar;B-8,M-3
+TRENES RETRASADOS|Los trenes llegan tarde otra vez.|Reorganizar horarios;I-5,F6|Despedir al jefe de estación;S-3,I3|Culpar al clima;L3
+FOTÓGRAFO OFICIAL|Un fotógrafo propone retratos heroicos.|Aceptar;P6,L3,I-3|Rechazar;P-2,C2|Retocar las fotos;P8,L5
+ESPÍA INCOMPETENTE|Capturan a un espía que se perdió en el cuartel.|Interrogarlo;S2,A-2|Reclutarlo;L-1,I-3,P2|Liberarlo;P-3
+COMITÉ DE PLANIFICACIÓN|Proponen crear un comité para decidir los comités.|Crearlo;I-6,S3|Vetarlo;Y-2,C2|Presidirlo;L3,P3
+FRENTE QUIETO|El frente lleva semanas tranquilo.|Entrenar;E6,F-4|Descansar;M5,B-3|Atacar sin plan;M-6,L4,T-300
+TANQUE ATASCADO|Un tanque modelo se atasca en el barro ante la prensa.|Culpar al barro;L3|Mejorar el diseño;I-8,E5|Esconder el tanque;P-2,L2
+LIGA DE ESPOSAS|Las esposas de los oficiales exigen permisos.|Concederlos;M5,B-3|Negarse;Y-3,M-4
+OBSERVADORES NEUTRALES|Visitantes neutrales piden ver el frente.|Mostrar lo mejor;P4,L3|Mostrar la verdad;C4,P-3|Negar la visita;P-4,L2
+CORRUPCIÓN EN INTENDENCIA|Faltan botas, sobran yates.|Investigar;S3,I-3,Y3|Mirar a otro lado;B-6,Y-4|Quedarse con un yate;L7
+CÓDIGOS COMPROMETIDOS|Sospechan que el enemigo lee sus mensajes.|Cambiar códigos;I-7,C4|Ignorarlo;A-8,L3|Culpar a un telegrafista;Y-3,L3
+EPIDEMIA DE GRIPE|La gripe se extiende por los cuarteles.|Cuarentena;M-3,T-100,S2|Seguir operando;T-500,M-5|Importar medicinas;I-8,M4
+HOMENAJE|Alguien propone una estatua suya.|Aceptar;P6,I-6,L2|Rechazar con modestia;C3,P-2|Exigir dos estatuas;P8,L5,S-2
+PRENSA SATÍRICA|Un diario se burla de su "genio".|Censurar;S-4,L-2|Ignorar;L3,C-2|Contestar;P-2,C2
+LLUVIA DE REPORTES|Recibe 400 informes y ninguno es legible.|Contratar secretarios;I-5,C3|Quemarlos;L5,Y-2|Leerlos;C3,L-2,I-3
+PUENTE VOLADO|Un puente clave desaparece.|Reconstruirlo;I-8,F3|Rodear;F-8,M-2|Culpar al ingeniero;Y-4,L2
+TORMENTA DE ARENA|Una tormenta frena a las tropas.|Resguardarse;M2,B-3|Avanzar;E-8,M-4|Rezar;L2
+ARMA MILAGROSA|Un inventor promete un arma decisiva.|Financiarla;I-12,P5,L2|Rechazar;P-2,C2|Pedir pruebas;C3,I-3
+ASESOR EXTRANJERO|Un asesor extranjero ofrece consejos.|Escuchar;C3,L-3,P-2|Ignorar;L3|Copiar sus ideas;L-1,P2
+REGIMIENTO DE BAILE|Un regimiento ensaya coreografías en vez de tácticas.|Cancelar;M-4,E3|Permitir;M4,E-3|Presumirlo;P4,L3
+ARCHIVO PERDIDO|Se pierden los planes de campaña.|Improvisar;L5,C-2|Reconstruirlos;I-5,C3|Culpar al enemigo;L3,P-1
+LEVA MASIVA|Se propone un reclutamiento forzoso.|Aprobar;T1500,S-6,M-3|Rechazar;S2|Leva voluntaria;T700,P2,I-3
+HUELGA DE COCINEROS|Los cocineros del ejército paran.|Negociar;B-5,M3|Sustituirlos;M-4,B-2|Cocinar usted;L4,M-6
+SOLDADO FILÓSOFO|Un soldado cuestiona la guerra en voz alta.|Debatir;C2,M-2|Silenciarlo;S-3|Ascenderlo;Y3,L2
+CRÍTICA EXTRANJERA|Un periódico extranjero analiza sus fallos.|Desmentirlo;L4,P-2|Aceptar críticas;C3,P-2|Comprar el periódico;P2,I-6
+PREMIO AL GENIO|Le ofrecen un premio inventado por usted.|Aceptarlo;P6,L4|Rechazarlo;C3|Dárselo a un general;Y5,P-2
+ESCASEZ DE BOTAS|Las tropas marchan descalzas.|Fabricar botas;I-8,M5|Marchas cortas;M-2,F-3|Llamarlo entrenamiento;M-6,L3
+MUNICIÓN VENDIDA|Se descubre que se vende munición al enemigo.|Castigo ejemplar;Y3,S2|Ocultarlo;A-8,L3|Comprarla de vuelta;I-6,A8
+LUNA LLENA|Los oficiales supersticiosos piden no atacar.|Respetar;M3,P-2|Ordenar atacar;M-3,P2,L2
+VISITA FAMILIAR|Un familiar exige visitar el frente.|Permitirlo;M-3,B-3,P2|Prohibirlo;Y-2
+CONTABLE DESASTROSO|Un contable pierde el presupuesto del mes.|Auditar;I-4,C3|Recortar gastos;I3,M-3|Imprimir dinero;I6,S-5
+CONCURSO DE MEDALLAS|Se reparten medallas sin criterio.|Racionarlas;Y3,M-2|Repartirlas;M4,Y-2|Concederse todas;P5,L5
+NIEBLA ESPESA|La niebla impide ver el frente.|Esperar;M-1,B-2|Atacar a ciegas;T-400,L3|Enviar exploradores;F-4,C2
+ARTISTAS DE CAMPAÑA|Un grupo teatral visita el frente.|Recibirlos;M6,B-3|Rechazarlos;M-3
+DESERTOR FAMOSO|Un oficial popular deserta.|Perseguirlo;F-6,Y-3|Perdonarlo;M2,L2|Ocultarlo;L3,C-2
+CARGAMENTO PERDIDO|Un cargamento se pierde durante una fiesta.|Castigar;Y2,S-2|Recuperarlo;F-5,B8|Olvidarlo;B-6
+TELEGRAMA CONFUSO|Un telegrama contradice sus propias órdenes.|Aclararlo;C2,I-2|Mantener la versión;L4|Ordenar lo contrario;L5,M-3
+CARTEL GIGANTE|Se propone un cartel con su cara de 40 metros.|Aprobarlo;P6,S3,I-6|Rechazarlo;C2,P-2
+PRISIONEROS ENEMIGOS|Los prisioneros consumen comida.|Intercambiarlos;P3,B2|Alimentarlos;B-6,C3|Ignorarlos;C-3,S-2
+ELECCIONES INTERNAS|Un grupo de oficiales pide votar al mando.|Ceder;Y4,S-4|Reprimir;S3,Y-6|Prometer reformas;L3,Y2
+MOTÍN DE INTENDENCIA|Intendencia exige mejores raciones.|Concederlas;B-6,M5|Negarse;M-4,S-2
+PLAN FILTRADO|Su plan "secreto" aparece en el periódico.|Investigar la filtración;S-3,Y2|Cambiar el plan;I-6,C2|Negarlo;L5
+ADIVINO|Un adivino predice su victoria.|Creerle;L3,P3|Expulsarlo;C2|Consultarlo cada turno;L5,P2
+REUNIÓN INTERMINABLE|La reunión del Estado Mayor dura toda la noche.|Dormirse;L5,C-3|Dirigirla bien;C4,L-3,M-1|Suspenderla;Y-2`.split('\n').filter(Boolean).forEach(l=>{const[t,d,...o]=l.split('|');EV.push({t,d,o:o.map(x=>{const[b,f]=x.split(';'),e={};f.replace(/([A-Z])(-?\d+)/g,(m,k,v)=>e[FK[k]]=+v);return[b,e]})})});
+// BANCO GENERADO DE PREGUNTAS (determinista: los índices guardados siguen válidos)
+(function(){let s=12345;const R=()=>(s=(s*1664525+1013904223)>>>0)/4294967296,sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a},pk=(a,n,ex)=>sh(a.filter(x=>!ex.includes(x))).slice(0,n),P=t=>t.split('/').map(x=>x.split('|')),add=(q,c,w,e,d)=>{const o=sh([c,...w]);Q.push([q,o,o.indexOf(c),e,d])};
+const YE=P("Invasión japonesa de Manchuria|1931/Hitler nombrado canciller|1933/Invasión italiana de Etiopía|1935/Remilitarización de Renania|1936/Inicio de la Guerra Civil Española|1936/Incidente del puente Marco Polo|1937/Anschluss (anexión de Austria)|1938/Acuerdo de Múnich|1938/Invasión alemana de Polonia|1939/Pacto Mólotov-Ribbentrop|1939/Invasión soviética de Finlandia|1939/Invasión alemana de Noruega|1940/Evacuación de Dunkerque|1940/Caída de París|1940/Batalla de Inglaterra|1940/Invasión italiana de Grecia|1940/Invasión alemana de Yugoslavia|1941/Operación Barbarroja|1941/Ataque a Pearl Harbor|1941/Hundimiento del Bismarck|1941/Caída de Singapur|1942/Batalla de Midway|1942/Batalla del Mar del Coral|1942/Segunda batalla de El Alamein|1942/Operación Torch|1942/Rendición alemana en Stalingrado|1943/Conferencia de Casablanca|1943/Batalla de Kursk|1943/Invasión aliada de Sicilia|1943/Armisticio de Italia|1943/Conferencia de Teherán|1943/Batalla de Anzio|1944/Día D (Normandía)|1944/Operación Bagration|1944/Liberación de París|1944/Operación Market Garden|1944/Batalla del Golfo de Leyte|1944/Ofensiva alemana de las Ardenas|1944/Conferencia de Yalta|1945/Bombardeo de Dresde|1945/Batalla de Iwo Jima|1945/Batalla de Okinawa|1945/Batalla de Berlín|1945/Conferencia de Potsdam|1945/Bombardeo atómico de Hiroshima|1945/Rendición de Japón|1945/Inicio del Bloqueo de Berlín|1948/Fundación de la OTAN|1949");
+const yr=Array.from({length:19},(_,k)=>String(1931+k));
+YE.forEach(([n,y],i)=>add('¿En qué año ocurrió: '+n+'?',y,pk(yr,3,[y]),n+': '+y+'.',2+i%2));
+const ys=[...new Set(YE.map(x=>+x[1]))],by={};YE.forEach(x=>(by[x[1]]=by[x[1]]||[]).push(x[0]));
+[0,1].forEach(m=>{const seen=new Set;let n=0,t=0;while(n<73&&t++<999){const ev=sh(ys).slice(0,4).map(v=>[by[v][Math.floor(R()*by[v].length)],v]),k=ev.map(x=>x[0]).sort().join();if(seen.has(k))continue;seen.add(k);const sr=[...ev].sort((a,b)=>a[1]-b[1]),ix=m?3:0;add(m?'¿Cuál de estos hechos ocurrió más tarde?':'¿Cuál de estos hechos ocurrió primero?',sr[ix][0],sr.filter((x,i)=>i!=ix).map(x=>x[0]),'Orden cronológico: '+sr.map(x=>x[0]+' ('+x[1]+')').join(', ')+'.',3);n++}});
+const H=(T,f1,f2)=>{const cs=[...new Set(T.map(x=>x[1]))];T.forEach(([n,c],i)=>{add(f1(n),c,pk(cs,3,[c]),n+': '+c+'.',1+i%3);add(f2(c),n,pk(T.filter(x=>x[1]!=c).map(x=>x[0]),3,[]),n+': '+c+'.',1+(i+1)%3)})};
+H(P("Spitfire|Reino Unido/Hurricane|Reino Unido/Lancaster|Reino Unido/Mosquito|Reino Unido/Churchill (tanque)|Reino Unido/Sten|Reino Unido/Bren|Reino Unido/Lee-Enfield|Reino Unido/Bf 109|Alemania/Fw 190|Alemania/Stuka Ju 87|Alemania/Me 262|Alemania/Panzer IV|Alemania/Tiger I|Alemania/Panther|Alemania/MP 40|Alemania/T-34|URSS/KV-1|URSS/IS-2|URSS/Katyusha|URSS/Il-2 Sturmovik|URSS/PPSh-41|URSS/Sherman|EE. UU./P-51 Mustang|EE. UU./B-17|EE. UU./B-29|EE. UU./M1 Garand|EE. UU./Thompson|EE. UU./Hellcat|EE. UU./Corsair|EE. UU./A6M Zero|Japón/Yamato|Japón/Arisaka|Japón/Fiat CR.42|Italia/Macchi C.202|Italia/Carro M13-40|Italia/Char B1|Francia/Dewoitine D.520|Francia/Somua S35|Francia"),n=>'¿De qué país era el '+n+'?',c=>'¿Cuál de estos equipos era de '+c+'?');
+H(P("El Alamein|Egipto/Kursk|URSS/Stalingrado|URSS/Monte Cassino|Italia/Anzio|Italia/Iwo Jima|Japón/Okinawa|Japón/Dunkerque|Francia/Sedán|Francia/Normandía|Francia/Arnhem|Países Bajos/Bastogne|Bélgica/Tobruk|Libia/Narvik|Noruega/Creta|Grecia/Corregidor|Filipinas/Varsovia|Polonia/Berlín|Alemania/Kohima|India/Guadalcanal|Islas Salomón"),n=>'¿En qué país se libró la batalla de '+n+'?',c=>'¿Qué batalla se libró en '+c+'?');
+H(P("Churchill|Reino Unido/Montgomery|Reino Unido/Mountbatten|Reino Unido/Slim|Reino Unido/Attlee|Reino Unido/Roosevelt|EE. UU./Eisenhower|EE. UU./Patton|EE. UU./MacArthur|EE. UU./Nimitz|EE. UU./Truman|EE. UU./Bradley|EE. UU./Stalin|URSS/Zhúkov|URSS/Konev|URSS/Hirohito|Japón/Yamamoto|Japón/Tōjō|Japón/Mussolini|Italia/Badoglio|Italia/De Gaulle|Francia/Pétain|Francia/Leclerc|Francia/Rommel|Alemania/Guderian|Alemania/Manstein|Alemania/Dönitz|Alemania/Mannerheim|Finlandia/Tito|Yugoslavia/Chiang Kai-shek|China"),n=>'¿A qué país se asocia a '+n+' durante la guerra?',c=>'¿Cuál de estos personajes sirvió a '+c+'?');
+const OP=P("Barbarroja|la invasión alemana de la URSS/Overlord|el desembarco aliado en Normandía/Market Garden|la ofensiva aliada aerotransportada en los Países Bajos/Torch|el desembarco aliado en el norte de África/Dynamo|la evacuación de Dunkerque/Citadel|la ofensiva alemana en Kursk/Husky|la invasión aliada de Sicilia/Dragoon|el desembarco aliado en el sur de Francia/Bagration|la ofensiva soviética en Bielorrusia/Uranus|el cerco soviético de las tropas alemanas en Stalingrado/Weserübung|la invasión alemana de Dinamarca y Noruega/Downfall|el plan aliado de invasión de Japón/Sealion|el plan alemán de invasión del Reino Unido/Avalanche|el desembarco aliado en Salerno");
+OP.forEach(([n,d],i)=>{add('¿Qué fue la Operación '+n+'?',d,pk(OP.map(x=>x[1]),3,[d]),'Operación '+n+': '+d+'.',2+i%2);add('¿Cómo se llamó '+d+'?','Operación '+n,pk(OP.map(x=>'Operación '+x[0]),3,['Operación '+n]),'Operación '+n+': '+d+'.',2+(i+1)%2)})})();
+// ===== MAPA 3D (Three.js) =====
+(function(){
+const U=.1,S={ok:0,failed:0,hov:-1,auto:0,t:0,zoomed:0,asp:2.4,drag:0,pa:0,arc:null,hh:0,def:''},T3=[],X={g:{},m:{}};
+const q4=i=>{const r=Math.floor(i/4),c=i%4,v=(r,c)=>[(c*100+((c*37+r*91)%17)-8)*U,(r*100+((c*53+r*29)%15)-7)*U];return[v(r,c),v(r,c+1),v(r+1,c+1),v(r+1,c)]};
+const cen=i=>{const q=q4(i);return[q.reduce((s,p)=>s+p[0],0)/4,q.reduce((s,p)=>s+p[1],0)/4]};
+const hgt=i=>.8+TER[i][1]/30;
+const fitRd=()=>Math.max(27,Math.min(80,46/(.728*S.asp)));
+function terHelp(i){const t=TER[i],o=G.own[i],b=o&&nbrs(i).some(j=>!G.own[j]);return[t[0],(o?"Bajo tu control. ":"Territorio enemigo. ")+"Defensa base "+t[1]+" (se multiplica por la dificultad y +4% por turno: ahora ~"+Math.round(defPow(i))+"). Importancia "+"★".repeat(Math.ceil(t[1]/25))+". "+(o?(b?"Es fronterizo: puede sufrir contraataques.":"Retaguardia segura."):(adj(i)?"Es adyacente a tus posiciones: puedes atacarlo. Haz clic para elegirlo como objetivo.":"No es adyacente a tus territorios: aún no puedes atacarlo."))]}
+function fallback(){const el=$('#map');let f=el.querySelector('.fb');if(!f){f=document.createElement('div');f.className='fb';el.appendChild(f)}f.innerHTML='<p>'+S.msg+'</p><div>'+TER.map((t,i)=>`<button onclick="selT(${i})">${G.own[i]?'✔':'✖'} ${t[0]}${G.sel===i?' ◀':''}</button>`).join('')+'</div>'}
+
+function init(){
+ if(typeof THREE==='undefined'){S.msg='No se pudo cargar Three.js. El mapa 3D necesita conexión a internet. Elige objetivo aquí:';return 0}
+ let R;try{R=new THREE.WebGLRenderer({antialias:true})}catch(e){S.msg='WebGL no está disponible en este navegador. Elige objetivo aquí:';return 0}
+ const el=$('#map'),cv=R.domElement,V3=THREE.Vector3;
+ R.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFShadowMap;
+ el.insertBefore(cv,el.firstChild);
+ const sc=new THREE.Scene();sc.background=new THREE.Color(0x0a1218);sc.fog=new THREE.Fog(0x0a1218,52,115);
+ const cam=new THREE.PerspectiveCamera(40,2.4,.5,300);
+ sc.add(new THREE.HemisphereLight(0xdfe6c4,0x1a2214,.85));
+ const sun=new THREE.DirectionalLight(0xfff1d0,1.05);sun.position.set(2,34,30);sun.target.position.set(20,0,10);sc.add(sun);sc.add(sun.target);
+ sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);const sh=sun.shadow.camera;sh.left=-32;sh.right=32;sh.top=26;sh.bottom=-26;sh.near=5;sh.far=90;sun.shadow.bias=-.0006;
+ const std=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.85,metalness:.05},o||{}));
+ const sea=new THREE.Mesh(new THREE.PlaneGeometry(260,260),std(0x0f1d27,{roughness:.35,metalness:.3}));sea.rotation.x=-Math.PI/2;sea.position.set(20,-.05,10);sea.receiveShadow=true;sc.add(sea);
+ const grid=new THREE.GridHelper(120,60,0x1f2e1c,0x16200f);grid.position.set(20,-.04,10);sc.add(grid);
+ // texturas
+ const tex=d=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');d(g);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(.18,.18);return t};
+ const TX={own:tex(g=>{g.fillStyle='#4b5d3a';g.fillRect(0,0,128,128);for(let k=0;k<520;k++){g.fillStyle='rgba('+(Math.random()<.5?'20,30,10':'150,180,110')+','+(Math.random()*.18)+')';g.fillRect(Math.random()*128,Math.random()*128,2+Math.random()*4,2+Math.random()*4)}}),
+  en:tex(g=>{g.fillStyle='#4a1d18';g.fillRect(0,0,128,128);g.strokeStyle='#8a3326';g.lineWidth=10;for(let k=-128;k<256;k+=32){g.beginPath();g.moveTo(k,128);g.lineTo(k+128,0);g.stroke()}})};
+S.TXo=TX.own;S.TXe=TX.en;
+ // geometrías y materiales compartidos
+ const g=X.g,m=X.m;
+ g.body=new THREE.BoxGeometry(1.7,.5,1.05);g.tur=new THREE.BoxGeometry(.8,.36,.65);g.bar=new THREE.CylinderGeometry(.07,.07,1.2,6);g.bar.rotateZ(Math.PI/2);g.tr=new THREE.BoxGeometry(1.85,.34,.24);
+ g.tree=new THREE.ConeGeometry(.5,1.6,6);g.hedge=new THREE.ConeGeometry(.32,.9,4);g.box=new THREE.BoxGeometry(1,1,1);g.pole=new THREE.CylinderGeometry(.06,.06,2.4,6);
+ g.flag=new THREE.PlaneGeometry(1.4,.9);g.flag.translate(.7,0,0);g.dot=new THREE.SphereGeometry(.32,12,8);g.head=new THREE.ConeGeometry(.45,1.2,8);
+ m.hull=std(0x5d6e45);m.hull2=std(0x6c7e51);m.dark=std(0x1b2016);m.tree=std(0x34462a);m.dead=std(0x3b2a24);m.fort=std(0x6a2a20);m.fortD=std(0x3d1812);m.hedge=std(0x2a1512);
+ m.flag=std(0xc0392b,{side:THREE.DoubleSide,emissive:0x400f09});m.pole=std(0xd8cba8);
+ m.arrow=new THREE.MeshBasicMaterial({color:0xf1e8cc,transparent:true,opacity:.92});
+ m.dash=new THREE.LineDashedMaterial({color:0xd8cba8,dashSize:.7,gapSize:.5,transparent:true,opacity:.65});
+ // territorios
+ S.meshes=[];
+ for(let i=0;i<8;i++){
+  const q=q4(i),c=cen(i),cx=c[0],cz=c[1];
+  const shp=new THREE.Shape(q.map(p=>new THREE.Vector2(cx+(p[0]-cx)*.94,-(cz+(p[1]-cz)*.94))));
+  const geo=new THREE.ExtrudeGeometry(shp,{depth:1,bevelEnabled:false});
+  const top=std(0xffffff,{map:TX.own}),side=std(0x2b3622);
+  const mesh=new THREE.Mesh(geo,[top,side]);mesh.rotation.x=-Math.PI/2;mesh.castShadow=true;mesh.receiveShadow=true;mesh.userData.i=i;
+  mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:0x0b0d09})));
+  sc.add(mesh);S.meshes.push(mesh);
+  const rg=new THREE.BufferGeometry().setFromPoints(q.map(p=>new V3(cx+(p[0]-cx)*.9,0,cz+(p[1]-cz)*.9)));
+  const rim=new THREE.LineLoop(rg,new THREE.LineBasicMaterial({color:0xd8cba8,transparent:true}));rim.visible=false;sc.add(rim);
+  const deco=new THREE.Group();deco.position.set(cx,0,cz);sc.add(deco);
+  const lc=document.createElement('canvas');lc.width=512;lc.height=128;const ltex=new THREE.CanvasTexture(lc);
+  const label=new THREE.Sprite(new THREE.SpriteMaterial({map:ltex,transparent:true,depthTest:false}));label.scale.set(10.4,2.6,1);label.renderOrder=5;sc.add(label);
+  T3.push({i,mesh,top,side,rim,deco,cx,cz,cur:-1,tgt:0,owned:null,key:'',lk:'',flash:0,flags:[],label,lc,ltex,bd:false,sel:false});
+ }
+ S.lg=new THREE.Group();sc.add(S.lg);
+ S.dot=new THREE.Mesh(g.dot,new THREE.MeshBasicMaterial({color:0xffffff}));S.dot.visible=false;sc.add(S.dot);
+ // partículas
+ const PN=360;S.PN=PN;S.pp=new Float32Array(PN*3).fill(-100);S.pc=new Float32Array(PN*3);S.pv=new Float32Array(PN*3);S.pl=new Float32Array(PN);S.pi=0;
+ const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(S.pp,3));pg.setAttribute('color',new THREE.BufferAttribute(S.pc,3));
+ const pts=new THREE.Points(pg,new THREE.PointsMaterial({size:.7,vertexColors:true,transparent:true,depthWrite:false}));pts.frustumCulled=false;sc.add(pts);S.pg=pg;
+ // cámara
+ const V={tx:20,ty:.4,tz:10,th:.28,ph:.86,rd:34},C=Object.assign({},V);
+ const cp=()=>{const ch=Math.cos(C.ph);cam.position.set(C.tx+Math.sin(C.th)*ch*C.rd,C.ty+Math.sin(C.ph)*C.rd,C.tz+Math.cos(C.th)*ch*C.rd);cam.lookAt(C.tx,C.ty,C.tz)};
+ S.V=V;S.C=C;
+ new ResizeObserver(()=>{const w=el.clientWidth,h=el.clientHeight;if(!w||!h)return;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();S.asp=w/h;if(!S.zoomed){V.rd=fitRd();if(!S.sized){C.rd=V.rd;S.sized=1}}}).observe(el);
+ // interacción
+ const rc=new THREE.Raycaster(),nd=new THREE.Vector2(),ptrs=new Map(),dr={mv:0,btn:0,pd:0};
+ const pick=e=>{const r=cv.getBoundingClientRect();nd.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);rc.setFromCamera(nd,cam);const h=rc.intersectObjects(S.meshes,false)[0];return h?h.object.userData.i:-1};
+ const pdist=()=>{const a=[...ptrs.values()];return Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])||1};
+ cv.addEventListener('contextmenu',e=>e.preventDefault());
+ cv.addEventListener('pointerdown',e=>{try{cv.setPointerCapture(e.pointerId)}catch(x){}ptrs.set(e.pointerId,[e.clientX,e.clientY]);dr.mv=0;dr.btn=e.button;if(ptrs.size==2){dr.pd=pdist();dr.mv=99}S.drag=1;cv.style.cursor='grabbing'});
+ cv.addEventListener('pointermove',e=>{
+  if(ptrs.has(e.pointerId)){
+   const o=ptrs.get(e.pointerId),dx=e.clientX-o[0],dy=e.clientY-o[1];ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+   if(ptrs.size==2){const d=pdist();V.rd=Math.max(12,Math.min(90,V.rd*dr.pd/d));dr.pd=d;S.zoomed=1}
+   else{dr.mv+=Math.abs(dx)+Math.abs(dy);
+    if(dr.btn==2||e.shiftKey){const k=V.rd*.0016;V.tx=Math.max(-5,Math.min(45,V.tx-Math.cos(V.th)*dx*k-Math.sin(V.th)*dy*k));V.tz=Math.max(-5,Math.min(25,V.tz+Math.sin(V.th)*dx*k-Math.cos(V.th)*dy*k))}
+    else{V.th-=dx*.006;V.ph=Math.max(.25,Math.min(1.45,V.ph+dy*.005))}}
+  }else{
+   const i=pick(e);S.hov=i;cv.style.cursor=i>=0&&G&&G.phase=='strategy'?'pointer':'grab';
+   if(HLP){if(i>=0){if(!S.hh){S.def=el.getAttribute('data-h')||'';S.hh=1}el.setAttribute('data-h',terHelp(i).join('§'))}else if(S.hh){el.setAttribute('data-h',S.def);S.hh=0}}
+  }});
+ const up=e=>{if(!ptrs.has(e.pointerId))return;const was=ptrs.size==1&&dr.mv<6&&e.type=='pointerup'&&e.button===0;ptrs.delete(e.pointerId);if(!ptrs.size){S.drag=0;cv.style.cursor='grab'}if(was){const i=pick(e);if(i>=0)selT(i)}};
+ cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+ cv.addEventListener('pointerleave',()=>{if(!ptrs.size)S.hov=-1});
+ cv.addEventListener('wheel',e=>{e.preventDefault();V.rd=Math.max(12,Math.min(90,V.rd*Math.exp(e.deltaY*.001)));S.zoomed=1},{passive:false});
+ // bucle
+ const cmp=$('#cmp');let last=performance.now();
+ const loop=now=>{requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;if(!el.offsetParent)return;
+  const an=CFG.anim;S.t+=dt;if(S.auto&&!S.drag)V.th+=dt*.18;
+  const k=1-Math.exp(-dt*(an?9:30));for(const p of['tx','ty','tz','th','ph','rd'])C[p]+=(V[p]-C[p])*k;cp();if(cmp)cmp.style.transform='rotate('+C.th+'rad)';
+  const kc=an?1-Math.exp(-dt*10):1;
+  T3.forEach(t=>{t.cur+=(t.tgt-t.cur)*kc;if(t.flash>0)t.flash=Math.max(0,t.flash-dt*1.2);
+   const bn=an?Math.sin(t.flash*Math.PI)*.9:0;
+   t.mesh.scale.z=Math.max(.05,t.cur);t.deco.position.y=t.cur+bn;t.rim.position.y=t.cur+.05;t.label.position.set(t.cx,t.cur+bn+3.4,t.cz);
+   const e=(t.sel?.32:0)+(S.hov==t.i?.16:0)+t.flash*.7;t.top.emissive.setRGB(e*.9,e*.8,e*.45);t.side.emissive.setRGB(e*.5,e*.45,e*.25);
+   t.rim.visible=t.bd||t.sel;t.rim.material.opacity=an?.55+.35*Math.sin(S.t*4+t.i):.9;t.rim.material.color.setHex(t.sel?0xffffff:0xd8cba8);
+   t.flags.forEach((f,j)=>{f.rotation.y=an?Math.sin(S.t*2.2+j+t.i)*.3:0})});
+  if(S.arc){S.dot.visible=true;S.dot.position.copy(S.arc.getPoint((S.t*.45)%1))}else S.dot.visible=false;
+  if(S.pa>0){let al=0;for(let n=0;n<S.PN;n++)if(S.pl[n]>0){al++;S.pv[n*3+1]-=16*dt;for(let j=0;j<3;j++)S.pp[n*3+j]+=S.pv[n*3+j]*dt;S.pl[n]-=dt*.9;if(S.pl[n]<=0)S.pp[n*3+1]=-100}S.pa=al;S.pg.attributes.position.needsUpdate=true}
+  R.render(sc,cam)};
+ cp();requestAnimationFrame(loop);
+ // utilidades dependientes de THREE
+ S.build={sc,V3,dash:m.dash};
+ return 1}
+
+function burst(x,y,z,col){const c=new THREE.Color(col);for(let k=0;k<44;k++){const n=S.pi++%S.PN;S.pp[n*3]=x+(Math.random()-.5)*4;S.pp[n*3+1]=y;S.pp[n*3+2]=z+(Math.random()-.5)*4;S.pv[n*3]=(Math.random()-.5)*6;S.pv[n*3+1]=3+Math.random()*7;S.pv[n*3+2]=(Math.random()-.5)*6;S.pl[n]=1;S.pc[n*3]=c.r;S.pc[n*3+1]=c.g;S.pc[n*3+2]=c.b}S.pa=1;S.pg.attributes.color.needsUpdate=true}
+
+function tank(){const g=new THREE.Group(),b=new THREE.Mesh(X.g.body,X.m.hull),t=new THREE.Mesh(X.g.tur,X.m.hull2),ba=new THREE.Mesh(X.g.bar,X.m.dark);
+ b.position.y=.42;t.position.set(-.1,.82,0);ba.position.set(.75,.84,0);g.add(b,t,ba);
+ [-.58,.58].forEach(z=>{const tr=new THREE.Mesh(X.g.tr,X.m.dark);tr.position.set(0,.2,z);g.add(tr)});
+ g.traverse(o=>{o.castShadow=true});return g}
+function trees(t,i,own){let s=i*7919+13;const r=()=>(s=(s*1664525+1013904223)>>>0)/4294967296,q=q4(i);
+ for(let k=0;k<9;k++){const u=.12+r()*.76,v=.12+r()*.76,sz=.7+r()*.7;if(Math.abs(u-.5)<.3&&Math.abs(v-.5)<.3)continue;
+  const x=(1-u)*(1-v)*q[0][0]+u*(1-v)*q[1][0]+u*v*q[2][0]+(1-u)*v*q[3][0],z=(1-u)*(1-v)*q[0][1]+u*(1-v)*q[1][1]+u*v*q[2][1]+(1-u)*v*q[3][1];
+  const m=new THREE.Mesh(X.g.tree,own?X.m.tree:X.m.dead);m.scale.setScalar(sz);m.position.set(x-t.cx,.8*sz,z-t.cz);m.castShadow=true;t.deco.add(m)}}
+function fort(t,i){const d=t.deco,add=(geo,mat,x,y,z,sx,sy,sz)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);if(sx)m.scale.set(sx,sy,sz);m.castShadow=true;d.add(m);return m};
+ add(X.g.box,X.m.fort,0,.7,0,3.2,1.4,3.2);add(X.g.box,X.m.fortD,0,2.2,0,1.5,1.6,1.5);add(X.g.pole,X.m.pole,0,4.2,0);
+ const f=add(X.g.flag,X.m.flag,.05,4.85,0);f.castShadow=false;t.flags.push(f);
+ const n=4+Math.floor(TER[i][1]/20);for(let k=0;k<n;k++){const a=k/n*Math.PI*2+.3,m=add(X.g.hedge,X.m.hedge,Math.cos(a)*3.6,.45,Math.sin(a)*3.6);m.rotation.z=(k%3-1)*.15}}
+function rebuild(t,i,own,n,face){const d=t.deco;while(d.children.length)d.remove(d.children[0]);t.flags=[];trees(t,i,own);
+ if(own){const rows=Math.ceil(n/3);for(let k=0;k<n;k++){const r=Math.floor(k/3),c=k%3,rn=Math.min(3,n-r*3),tk=tank();tk.position.set((c-(rn-1)/2)*2.4,0,(r-(rows-1)/2)*2);tk.rotation.y=face;d.add(tk)}}
+ else fort(t,i)}
+function label(t,i,own,bd,mn){const g=t.lc.getContext('2d');g.clearRect(0,0,512,128);g.fillStyle='rgba(13,15,11,.74)';g.fillRect(4,10,504,108);g.strokeStyle=own?'#8fbf6a':'#e8836f';g.lineWidth=4;g.strokeRect(4,10,504,108);
+ g.textAlign='center';g.fillStyle='#ece6d4';g.font='bold 50px Consolas,monospace';g.fillText(TER[i][0].toUpperCase(),256,62);
+ g.font='34px Consolas,monospace';g.fillStyle=own?'#d8cba8':'#e8836f';g.fillText((own?'▣ '+mn+' · ':'✖ ')+'DEF '+TER[i][1]+(bd?' ⚠':''),256,104);t.ltex.needsUpdate=true}
+function sync(i,mn){const t=T3[i],own=!!G.own[i],bd=own&&nbrs(i).some(j=>!G.own[j]),en=nbrs(i).find(j=>!G.own[j]);
+ let face=Math.PI/2;if(en!=null){const c=cen(en);face=Math.atan2(-(c[1]-t.cz),c[0]-t.cx)}
+ const n=own?Math.max(1,Math.min(8,Math.ceil(mn/700))):0,key=own?'o'+n+'|'+face.toFixed(2):'e';
+ if(t.owned!==own){t.owned=own;t.top.map=own?S.TXo:S.TXe;t.side.color.setHex(own?0x2b3622:0x3a1a14);
+  if(PO&&PO[i]!=null&&!!PO[i]!==own&&CFG.anim){t.flash=1;burst(t.cx,Math.max(0,t.cur)+1,t.cz,own?0xcfe08a:0xe0553c)}}
+ if(t.key!==key){t.key=key;rebuild(t,i,own,n,face)}
+ t.bd=bd;t.sel=G.sel===i;t.tgt=hgt(i)+(t.sel?.7:0);if(t.cur<0)t.cur=t.tgt;
+ const lk=[own,mn,bd,TER[i][0]].join('|');if(t.lk!==lk){t.lk=lk;label(t,i,own,bd,mn)}}
+function lines(){const lg=S.lg,V3=S.build.V3;while(lg.children.length){const o=lg.children[0];lg.remove(o);if(o.geometry)o.geometry.dispose()}S.arc=null;
+ for(let i=0;i<8;i++)[i+1,i+4].forEach(j=>{if(j<8&&(j!=i+1||i%4<3)&&G.own[i]&&G.own[j]){const a=cen(i),b=cen(j),gm=new THREE.BufferGeometry().setFromPoints([new V3(a[0],hgt(i)+.3,a[1]),new V3(b[0],hgt(j)+.3,b[1])]),l=new THREE.Line(gm,S.build.dash);l.computeLineDistances();lg.add(l)}});
+ if(G.phase=='strategy'&&G.sel!=null&&!G.own[G.sel]){const f=nbrs(G.sel).find(j=>G.own[j]);if(f!=null){const a=cen(f),b=cen(G.sel),p0=new V3(a[0],hgt(f)+1.8,a[1]),p2=new V3(b[0],hgt(G.sel)+1.8,b[1]),p1=p0.clone().add(p2).multiplyScalar(.5);p1.y+=5;
+  const cv=new THREE.QuadraticBezierCurve3(p0,p1,p2),tube=new THREE.Mesh(new THREE.TubeGeometry(cv,32,.14,6),X.m.arrow),tan=cv.getTangent(1).normalize(),hd=new THREE.Mesh(X.g.head.clone(),X.m.arrow);
+  hd.quaternion.setFromUnitVectors(new V3(0,1,0),tan);hd.position.copy(p2);lg.add(tube);lg.add(hd);S.arc=cv}}}
+
+window.map3d=function(mn){
+ if(!S.ok){if(S.failed){fallback();return}S.ok=init();if(!S.ok){S.failed=1;fallback();return}}
+ for(let i=0;i<8;i++)sync(i,mn);lines()};
+window.view3d=function(k){if(!S.ok)return;const P={iso:[.86,.28],tac:[1.42,0],low:[.38,-.5]}[k],V=S.V,C=S.C,w=Math.round(C.th/(Math.PI*2))*Math.PI*2;C.th-=w;V.th-=w;
+ V.ph=P[0];V.th=P[1];S.zoomed=0;V.rd=fitRd()*(k=='low'?.8:1);V.tx=20;V.tz=10;document.querySelectorAll('#map .cam [data-v]').forEach(b=>{if(b.dataset.v!='auto')b.classList.toggle('on',b.dataset.v==k)})};
+window.auto3d=function(){S.auto=!S.auto;const b=document.querySelector('#map .cam [data-v=auto]');if(b)b.classList.toggle('on',!!S.auto)};
+})();
+
+// AYUDA CONTEXTUAL
+let HLP=0;
+const PD={aggressive:"Agresivo: siempre empuja a atacar. Si lo nombras comandante, +8% al poder de ataque.",defensive:"Defensivo: prefiere fortificar. Si manda, +20% de defensa ante contraataques.",ambitious:"Ambicioso: quiere tu puesto. Cada derrota le sube la sospecha 3 puntos extra. Recomienda reforzar el ejército.",loyal:"Leal: recomienda reabastecer. Sin bonificaciones especiales aparte de su competencia.",cowardly:"Cobarde: recomienda retirarse. Sin bonificaciones especiales aparte de su competencia.",strategic:"Estratégico: recomienda obtener inteligencia antes de actuar. Sin bonificaciones especiales aparte de su competencia."};
+const PHX={brief:"Informe inicial del mes: territorios, tropas e inteligencia activa. Pulsa el botón para recibir la pregunta del Estado Mayor.",question:"Pregunta de historia militar con 4 respuestas. Acertar: credibilidad +4, LARPER -4, prestigio +1. Fallar: LARPER +8 (más en dificultad alta) y credibilidad -3. La explicación aparece al responder. No se repiten preguntas hasta agotar el banco.",strategic:"",strategy:"Fase de órdenes: eliges doctrina, comandante y UNA orden. Cuando la ejecutas se resuelve la batalla y no puedes repetirla.",report:"Informe de la batalla y del contraataque enemigo: resultado, bajas, efecto en moral y LARPER y reacción del comandante.",event:"Evento aleatorio: un acontecimiento con 2-3 decisiones. Cada una modifica varias estadísticas; los efectos exactos se descubren al elegir.",react:"Reacciones: los generales ajustan lealtad y sospecha, se produce el suministro del mes y se comprueban las condiciones de victoria o derrota."};
+const BL={"Lealtad":"Lealtad de este general hacia ti (0-100). Sube con victorias (+3) y al seguir su consejo; baja con derrotas (-3). Si la media de los generales cae bajo 25 hay riesgo de golpe de Estado.","Sospecha":"Cuánto sospecha este general de que eres un impostor. Sube con derrotas (+6, más en dificultad alta), con LARPER LEVEL por encima de 60 (+4 por turno) y al ignorar su consejo si es el comandante. Si algún general supera 90 hay un 50% de golpe de Estado cada turno.","Tropas":"Efectivos de tu ejército (máx. 20.000). Su número determina tu poder de ataque y tu defensa. Bajan en batallas y contraataques; con 1.000 o menos pierdes por MILITARY COLLAPSE. REINFORCE añade 1.500.","Moral":"Ánimo de la tropa (0-100). Multiplica ataque y defensa. Sube con victorias; baja con derrotas, retiradas y con comida inferior a 20 (-5 por turno). A 0 el ejército colapsa.","Equipo":"Calidad del equipamiento (0-100). Multiplica tu poder de ataque. Baja en derrotas y sin combustible; REINFORCE da +8."};
+const BR={"🎖 Credibilidad":"Tu reputación ante el mando. Sube +4 al acertar preguntas y baja -3 al fallar; además cae poco a poco si tu LARPER LEVEL es alto. Entra en el índice de reputación. No es lo mismo que la sospecha de los generales.","★ Prestigio":"Tu fama pública. Sube con victorias (+5) y eventos favorables. Con 70 o más, la producción de recursos aumenta un 15%. Entra en el índice de reputación.","⛽ Combustible":"Lo consumen ATTACK (15) e INTELLIGENCE (5). Se produce cada turno según industria y estabilidad; RESUPPLY da +20. Con 0 tu equipo se deteriora.","🔫 Munición":"ATTACK consume 15. Se produce cada turno; RESUPPLY da +20.","🍞 Comida":"DEFEND consume 10. Con menos de 20 tu ataque cae un 30% y la moral baja 5 por turno. RESUPPLY da +15.","🏭 Industria":"Capacidad productiva. REINFORCE (20), RESUPPLY (15) e INTELLIGENCE (5) la gastan. Cuanto mayor, más recursos produces cada turno.","Estabilidad":"Estabilidad política (0-100). Multiplica la producción de recursos; baja con represión y malas decisiones. Para el final MASTER MANIPULATOR debe ser 70 o más al terminar la campaña.","Lealtad":"Lealtad política del régimen. Sube con victorias (+2). Para MASTER MANIPULATOR debe ser 60 o más al terminar."};
+const OT={attack:"Intenta conquistar el territorio enemigo seleccionado (debe ser adyacente al tuyo). Coste: 15 combustible y 15 munición. Tu poder = tropas/200 x moral x equipo x doctrina x comandante x reputación (+15% con inteligencia) contra la defensa del territorio, con ±10% de azar. Victoria: conquistas, moral +8, prestigio +5, LARPER -4. Derrota: bajas altas, moral -12, equipo -6, LARPER +6.",defend:"Coste: 10 comida. Moral +5 y defensa x1,6 ante el contraataque enemigo de este turno. Útil si tu frente está débil.",retreat:"Sin coste. Evitas el combate: el enemigo tiene un 40% de ocupar un territorio fronterizo (sin bajas). Moral -4 y LARPER +3.",reinforce:"Coste: 20 industria. Recibes 1.500 tropas y +8 de equipo.",resupply:"Coste: 15 industria. Recuperas 20 de combustible, 20 de munición y 15 de comida.",intelligence:"Coste: 5 combustible y 5 industria. Tu próximo ataque tiene +15% de poder (se gasta al atacar)."};
+const PT={agr:"Ganas más combates pero sufres un 40% más de bajas y te defiendes peor.",bal:"Sin bonificaciones ni penalizaciones.",cau:"Menos poder de ataque, pero un 40% menos de bajas y +20% de defensa ante contraataques."};
+const H=(q,d)=>document.querySelectorAll(q).forEach((e,i)=>{const x=typeof d=='function'?d(e,i):d;if(x)e.setAttribute('data-h',x[0]+'§'+x[1])});
+const lb=e=>(e.classList.contains('bar')?e.previousElementSibling:e).firstChild.textContent,oc=e=>e.getAttribute('onclick')||'',ar=e=>{const m=oc(e).match(/\('?(\w+)'?\)/);return m&&m[1]};
+function toggleHelp(){HLP=!HLP;document.body.classList.toggle('help',!!HLP);if(!HLP)$('#tip').style.display='none';if(G)render()}
+document.addEventListener('mousemove',e=>{if(!HLP)return;const t=e.target.closest&&e.target.closest('[data-h]'),b=$('#tip');if(!t){b.style.display='none';return}const x=t.getAttribute('data-h').split('§');b.innerHTML='<b>'+x[0]+'</b>'+x[1];b.style.display='block';let L=e.clientX+16,T=e.clientY+16;const w=b.offsetWidth,h=b.offsetHeight;if(L+w>innerWidth-8)L=e.clientX-w-16;if(T+h>innerHeight-8)T=e.clientY-h-16;b.style.left=Math.max(4,L)+'px';b.style.top=Math.max(4,T)+'px'});
+function applyHelp(){const P=G.player;
+H('#top',['Barra superior','Datos de la campaña y botones de control.']);
+H('#top b',['Régimen','Nombre del régimen ficticio que diriges. Todo en este juego es satírico e inventado.']);
+H('#top span',(e,i)=>[['Mes / turno','La campaña dura 12 meses y cada turno es un mes. Al terminar el 12 se decide el final según tus estadísticas.'],['Dificultad','ARMCHAIR GENERAL: recursos abundantes y enemigos débiles. FIELD MARSHAL: equilibrada. MILITARY GENIUS: recursos escasos, enemigos más fuertes y generales más desconfiados. No se cambia a mitad de partida.'],['Fase actual','Parte del turno en la que estás. Mira la barra de fases del panel central.']][i]);
+H('#top button',e=>{const t=e.textContent;return t.includes('AYUDA')?['Ayuda','Activa o desactiva este modo ayuda: resalta todos los elementos y explica cada uno al pasar el cursor.']:t=='PAUSA'?['Pausa','Abre el menú de pausa para reanudar, guardar o salir.']:t=='GUARDAR'?['Guardar','Guarda la partida en el navegador. También se guarda sola en cada fase. Retómala con CONTINUE en el menú principal.']:['Menú','Vuelve al menú principal. La partida sigue guardada.']});
+H('.tl',['Línea de tiempo','Avance de la campaña, del mes 1 al 12.']);
+H('#left',['Panel izquierdo','Tus generales y el estado de tu ejército.']);
+H('#left h3',(e,i)=>i?['Ejército','Estado de tus fuerzas: tropas, moral y equipo. Determinan tu poder en combate.']:['Generales','Tus generales. Cada uno tiene personalidad, lealtad, sospecha y competencia. Reaccionan a tus decisiones y pueden conspirar contra ti.']);
+H('.gen',(e,i)=>{const g=G.gens[i];return g&&[g.name,PD[g.personality]+" Competencia "+g.competence+" (suma "+(g.competence/10).toFixed(1)+"% de poder si lo nombras comandante). Lealtad "+g.loyalty+", sospecha "+g.suspicion+". "+(G.cmd==i?"Es el comandante actual (barra dorada).":"Asígnalo como comandante en la fase de órdenes.")+" Borde del círculo: rojo si la sospecha supera 60, verde si la lealtad supera 60, beige si es neutral."]});
+H('#left .row,#left .bar',e=>{const l=lb(e);return BL[l]&&[l,BL[l]]});
+H('#right',['Panel derecho','Tu reputación, recursos y estabilidad política.']);
+H('#right h3',(e,i)=>[['LARPER LEVEL','Mide cuánto sospechan tus subordinados de que eres un impostor.'],['Reputación','Combina credibilidad, prestigio y LARPER LEVEL en un índice con efectos reales.'],['Recursos','Combustible, munición, comida e industria. Cada orden consume algunos y se producen más cada turno.'],['Política','Estabilidad y lealtad del régimen. Definen el final MASTER MANIPULATOR.']][i]);
+H('#right svg',(e,i)=>i?['Gráfica de reputación','Evolución turno a turno: verde credibilidad, rojo LARPER LEVEL, beige prestigio. Aparece tras el primer turno.']:['Medidor de LARPER LEVEL','Sube al fallar preguntas, perder batallas y tomar malas decisiones; baja al acertar y ganar. Al llegar a 100 pierdes con CERTIFIED LARPER. Por encima de 60 el borde de la pantalla parpadea en rojo.']);
+H('#right div.m',(e,i)=>i?['Índice de reputación','Credibilidad x0,5 + prestigio x0,5 - LARPER x0,4. Con 60 o más tienes aura de genio (+10% de ataque); por debajo de 20 nadie te sigue (-10%). Con prestigio de 70 o más, +15% de producción. Rangos: FANTOCHE, AFICIONADO, MANDO RESPETADO, ESTRATEGA ADMIRADO, GENIO INDISCUTIBLE.']:['Valor y rango','Rangos: RESPECTED LEADER (0-20), SLIGHTLY SUSPICIOUS (21-40), ARMCHAIR GENERAL (41-60), CERTIFIED IMPOSTOR (61-80), TOTAL FRAUD (81-99), EXPOSED (100).']);
+H('#right small.m',['Leyenda','Colores de la gráfica de reputación.']);
+H('#right .row,#right .bar',e=>{const l=lb(e);return BR[l]&&[l,BR[l]]});
+const MP='Mapa estratégico ficticio de 8 territorios: verde = tuyos, rayado rojo = enemigos. Haz clic en un territorio enemigo adyacente para fijarlo como objetivo. Mapa 3D: arrastra para rotar, rueda para zoom, clic derecho para desplazar. Conquista los 8 para STRATEGIC GENIUS; si pierdes todos, TOTAL DEFEAT.';
+H('#map',['Mapa estratégico',MP]);H('#map rect',['Mapa estratégico',MP]);
+H('#map polygon',(e,i)=>{const t=TER[i];if(!t)return;const o=G.own[i],b=o&&nbrs(i).some(j=>!G.own[j]);return[t[0],(o?"Bajo tu control. ":"Territorio enemigo. ")+"Defensa base "+t[1]+" (se multiplica por la dificultad y +4% por turno: ahora ~"+Math.round(defPow(i))+"). Importancia "+"★".repeat(Math.ceil(t[1]/25))+". "+(o?(b?"Es fronterizo: puede sufrir contraataques.":"Retaguardia segura."):(adj(i)?"Es adyacente a tus posiciones: puedes atacarlo. Haz clic para elegirlo como objetivo.":"No es adyacente a tus territorios: aún no puedes atacarlo."))]});
+H('#map .sup',['Línea de suministro','Une territorios propios contiguos.']);
+H('#map .atk',['Flecha de ataque','Ruta del asalto desde tu territorio hacia el objetivo seleccionado.']);
+H('#info',['Información del territorio','Control, defensa, importancia y, si es atacable, la probabilidad de éxito estimada con tu doctrina y comandante actuales.']);
+H('#main',['Panel de mando','Aquí se desarrolla cada fase del turno.']);
+H('.stp',['Fases del turno','Briefing, pregunta, órdenes, batalla, evento y reacciones. Siempre en este orden; no se pueden saltar. La fase actual está resaltada.']);
+H('.stp span',(e,i)=>{const k=PHS[i];return[PHL[i],PHX[k]]});
+H('#main h3',e=>[e.textContent,PHX[G.phase]]);
+H('#main p',e=>e.classList.contains('m')?['Consejo del comandante','Cada personalidad recomienda una orden (marcada con ★). Seguirla: lealtad +3, sospecha -3 y LARPER -2. Ignorarla: sospecha +2. Si hay un objetivo adyacente seleccionado se muestra el éxito estimado.']:['Información',PHX[G.phase]]);
+H('.chips b',e=>e.textContent=='Doctrina'?['Doctrina','Tu estilo de mando este turno: cambia el poder de ataque, las bajas y la defensa ante el contraataque.']:['Comandante','General que dirige la operación: su competencia mejora el ataque y su personalidad aporta bonificaciones.']);
+H('.chip',e=>{const k=ar(e);if(oc(e).startsWith('setPlan')&&PL[k])return[PL[k].n,"Poder de ataque x"+PL[k].a+", bajas x"+PL[k].c+", defensa x"+PL[k].d+". "+PT[k]];const g=G.gens[+k];return g&&['Comandante: '+g.name,"Competencia "+g.competence+" (+"+(g.competence/10).toFixed(1)+"% de ataque). "+PD[g.personality]+" Recomienda "+REC[g.personality].toUpperCase()+"."]});
+H('#main button',e=>{const o=oc(e),k=ar(e);return o.startsWith('order')&&OT[k]?[k.toUpperCase(),OT[k]+" Si está desactivado, se indica el motivo (falta un recurso o un objetivo válido)."]:o.startsWith('ans')?['Respuesta','Solo una es correcta. Se explica el resultado al responder.']:o.startsWith('choose')?['Decisión del evento','Cada opción modifica varias estadísticas. Los efectos exactos se descubren al elegir.']:['Continuar','Avanza a la siguiente fase del turno.']});
+H('.rp',['Informe de batalla','Resultado, bajas, efectos en moral y LARPER, reacción del comandante y contraataque enemigo.']);
+H('#log',['Historial','Registro de tus últimas acciones y decisiones, de la más reciente a la más antigua.']);
+H('#log h3',['Historial','Registro de tus últimas acciones y decisiones.'])}
+let CFG={anim:1};try{CFG=JSON.parse(localStorage.getItem('lh_cfg'))||CFG}catch(e){}
+function applyCfg(){document.body.classList.toggle('noanim',!CFG.anim);$('#animb').textContent='ANIMACIONES: '+(CFG.anim?'SÍ':'NO')}
+function setAnim(){CFG.anim=CFG.anim?0:1;try{localStorage.setItem('lh_cfg',JSON.stringify(CFG))}catch(e){}applyCfg()}
+applyCfg();show('menu');
+</script>
+<script>
+// ===== EXTENSIÓN v2: país, ideología, economía, tienda, CHAROS, archivo histórico (IA) =====
+(function(){
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const IDE={progre:'PROGRE',facha:'FACHA'};
+// ---- PAÍSES (q: [pregunta,[opciones],correcta,explicación,marco PROGRE,marco FACHA]) ----
+const CTRY={
+es:{n:'España',f:'🇪🇸',d:'Potencia exhausta tras su guerra civil; neutral en teoría, simpatizante del Eje en la práctica.',pos:'Neutral / no beligerante',al:'Alemania e Italia (simpatía)',ri:'Reino Unido, URSS',m:120,dip:45,inc:.8,pro:'Neutralidad: menos riesgo diplomático',con:'Economía devastada: ingresos -20%',
+q:[["¿Cuál fue la posición oficial de España durante la Segunda Guerra Mundial?",["Neutralidad, con una fase de «no beligerancia» (1940-1943)","Miembro formal del Eje","Aliada de Reino Unido","Ocupada por Alemania"],0,"Declaró neutralidad en 1939, pasó a «no beligerancia» en 1940 y volvió a la neutralidad en 1943.","Dicen que fue 'neutral'. Veamos qué dicen los documentos.","Dicen que se 'mantuvo al margen'. Veamos qué dicen los documentos."],
+["¿Qué resultó de la entrevista de Hendaya entre Franco y Hitler (octubre de 1940)?",["Sin acuerdo para que España entrara en la guerra","España declaró la guerra a Reino Unido","Alemania ocupó Gibraltar","Se firmó el Pacto de Acero"],0,"No hubo acuerdo: las exigencias de ambos eran incompatibles y España no entró en la guerra.","Un encuentro entre dictadores. ¿Hubo pacto o no?","Una 'astuta jugada diplomática', según algunos. ¿Qué ocurrió?"],
+["¿En qué frente combatió la División Azul, formada por voluntarios españoles?",["Frente oriental (URSS)","Norte de África","Normandía","Pacífico"],0,"Combatió junto a la Wehrmacht en el frente oriental (zona de Nóvgorod y Leningrado) entre 1941 y 1943.","Voluntarios que se fueron a luchar por una dictadura ajena.","Voluntarios 'contra el comunismo'. ¿Dónde estuvieron?"]]},
+uk:{n:'Reino Unido',f:'🇬🇧',d:'Isla resistente con un imperio a cuestas y un primer ministro con gran afición al discurso.',pos:'Aliado',al:'EE. UU., URSS, Francia Libre',ri:'Alemania, Italia, Japón',m:150,dip:60,inc:1,pro:'Armada y radar: +10 diplomacia inicial',con:'Imperio caro de mantener',
+q:[["¿Qué nombre clave tuvo el plan alemán de invadir Reino Unido en 1940?",["Operación León Marino (Sealion)","Operación Barbarroja","Operación Overlord","Operación Dragoon"],0,"Sealion nunca se ejecutó: Alemania no logró la superioridad aérea en la Batalla de Inglaterra.","Un imperio resistiendo, sí; ¿pero el plan alemán cómo se llamaba?","Un 'pueblo indomable'. ¿Cómo se llamaba el plan alemán?"],
+["¿Qué ciudad británica sufrió en noviembre de 1940 un bombardeo que destruyó su catedral?",["Coventry","Edimburgo","Oxford","Cambridge"],0,"El 14 de noviembre de 1940 la Luftwaffe bombardeó Coventry.","Bombardeos: hechos, no consignas.","Bombardeos: hechos, no consignas."]]},
+pl:{n:'Polonia',f:'🇵🇱',d:'Primera víctima de la invasión de 1939, con ejército, gobierno en el exilio y mucha memoria.',pos:'Aliado ocupado',al:'Reino Unido, Francia',ri:'Alemania, URSS',m:70,dip:55,inc:.7,pro:'Resistencia: lealtad base alta',con:'Territorio ocupado: ingresos -30%',
+q:[["¿Qué potencia invadió Polonia desde el este el 17 de septiembre de 1939?",["URSS","Alemania","Checoslovaquia","Lituania"],0,"La URSS invadió tras el pacto Mólotov-Ribbentrop; Alemania había invadido el 1 de septiembre.","Dos invasores, un reparto. Ojo con el que la izquierda olvida.","Dos invasores, un reparto. Ojo con el que algunos ignoran."],
+["¿Qué organización dirigió el Alzamiento de Varsovia de 1944?",["Armia Krajowa (Ejército Nacional)","Ejército Rojo","Wehrmacht","Legión Checa"],0,"El Ejército Nacional (Armia Krajowa) se alzó en agosto de 1944; la ciudad fue arrasada tras 63 días.","Un levantamiento popular, sí. ¿Quién lo organizó?","Un levantamiento patriótico, sí. ¿Quién lo organizó?"]]}};
+const GEN=[["En 1939 un cartel oficial alemán dice que Polonia atacó primero. ¿Qué es esa afirmación?",["Propaganda: la agresión se escenificó (incidente de Gleiwitz)","Un hecho verificado","Una opinión legítima","Una conclusión neutral de la Sociedad de Naciones"],0,"El incidente de Gleiwitz fue una operación de falsa bandera de las SS usada como pretexto para invadir Polonia.","Ojo: aquí no vale el sesgo de nadie.","Ojo: aquí no vale el sesgo de nadie."],
+["«El Tratado de Versalles fue injusto» ¿qué tipo de enunciado es?",["Una opinión (juicio de valor)","Un hecho verificable","Propaganda por definición","Un dato estadístico"],0,"Es una valoración: sus cláusulas son hechos documentados, pero juzgarlas es opinión (y los historiadores discrepan).","Distinguir hecho de opinión también te incluye a ti.","Distinguir hecho de opinión también te incluye a ti."]];
+CTRY.fr={n:'Francia',f:'🇫🇷',d:'Derrotada en 1940, dividida entre ocupación, Vichy y Francia Libre.',pos:'Aliado ocupado',al:'Reino Unido, EE. UU.',ri:'Alemania, Italia',m:90,dip:50,inc:.8,pro:'Resistencia: prestigio inicial',con:'Ocupación: ingresos -20%',q:[["¿Qué régimen gobernó la Francia no ocupada desde julio de 1940?",["El régimen de Vichy, encabezado por Pétain","La Tercera República","La Francia Libre de De Gaulle","Un protectorado británico"],0,"El régimen de Vichy, con Philippe Pétain, colaboró con Alemania.","¿Colaboración o resistencia? Mira los hechos.","¿Colaboración o resistencia? Mira los hechos."],["¿Quién encabezó la Francia Libre desde Londres?",["Charles de Gaulle","Philippe Pétain","Pierre Laval","Jean Moulin"],0,"De Gaulle lanzó el Llamamiento del 18 de junio de 1940.","Un militar conservador liderando la resistencia: la historia es compleja.","Un militar conservador liderando la resistencia: la historia es compleja."]]};
+CTRY.us={n:'EE. UU.',f:'🇺🇸',d:'Arsenal de las democracias; entra en guerra tras Pearl Harbor.',pos:'Aliado',al:'Reino Unido, URSS',ri:'Japón, Alemania, Italia',m:220,dip:60,inc:1.3,pro:'Industria colosal: ingresos +30%',con:'Entrada tardía: diplomacia menos cohesionada',q:[["¿Qué programa de 1941 permitió a EE. UU. suministrar material a los Aliados?",["Lend-Lease (Préstamo y Arriendo)","Plan Marshall","Doctrina Truman","Programa Apolo"],0,"La Ley de Préstamo y Arriendo se aprobó en marzo de 1941.","Capitalismo y guerra: ¿negocio o ayuda?","Capitalismo y guerra: ¿negocio o ayuda?"],["¿Cómo se llamó el proyecto estadounidense para desarrollar la bomba atómica?",["Proyecto Manhattan","Proyecto Overlord","Proyecto Enigma","Proyecto Trinity Land"],0,"El Proyecto Manhattan culminó con la prueba Trinity (julio de 1945).","Ciencia y poder: ¿quién decide?","Ciencia y poder: ¿quién decide?"]]};
+CTRY.it={n:'Italia',f:'🇮🇹',d:'Aliada del Eje que cambió de bando en pleno conflicto.',pos:'Eje, luego cobeligerante',al:'Alemania (hasta 1943)',ri:'Aliados',m:80,dip:40,inc:.8,pro:'Flexibilidad diplomática',con:'Ejército débil y dividido',q:[["¿Qué ocurrió con Mussolini en julio de 1943?",["Fue destituido por el Gran Consejo Fascista y arrestado","Ganó las elecciones","Se exilió en España","Declaró la guerra a Alemania"],0,"El 25 de julio de 1943 fue destituido; Alemania lo rescató semanas después.","Un dictador cae. ¿Cómo?","Un líder cae. ¿Cómo?"],["¿Qué anunció Italia el 8 de septiembre de 1943?",["Un armisticio con los Aliados","Su entrada en el Eje","La conquista de Etiopía","Su neutralidad perpetua"],0,"Italia firmó el armisticio de Cassibile; Alemania ocupó el norte y el centro.","Cambiar de bando a mitad del partido tiene consecuencias.","Cambiar de bando a mitad del partido tiene consecuencias."]]};
+CTRY.de={n:'Alemania',f:'🇩🇪',d:'Democracia moderna que asume críticamente su pasado nazi; aquí juegas con esa memoria a cuestas.',pos:'Democracia federal que revisa su historia',al:'Francia, Reino Unido, EE. UU. (hoy)',ri:'Ninguno actual; históricamente, los Aliados',m:160,dip:40,inc:1.1,pro:'Industria sólida: ingresos +10%',con:'Estigma histórico: diplomacia inicial baja',q:[["¿Cómo se llamó la oleada de pogromos contra los judíos en Alemania los días 9 y 10 de noviembre de 1938?",["Noche de los Cristales Rotos (Kristallnacht)","Noche de los Cuchillos Largos","Incendio del Reichstag","Putsch de la Cervecería"],0,"Fue una violencia organizada por el régimen nazi: sinagogas incendiadas, comercios destruidos y miles de judíos detenidos.","Los hechos no admiten relativismo.","Los hechos no admiten relativismo."],["¿Qué ocurrió con Alemania tras su rendición en mayo de 1945?",["Fue dividida en cuatro zonas de ocupación aliadas","Pasó a ser un protectorado de la URSS","Mantuvo su gobierno intacto","Se unió a Austria"],0,"EE. UU., Reino Unido, Francia y la URSS ocuparon el país; Berlín también se dividió en cuatro sectores.","Un país derrotado y repartido: cada bando cuenta el reparto a su manera.","Un país derrotado y repartido: cada bando cuenta el reparto a su manera."],["¿Qué fue la Rosa Blanca?",["Un grupo estudiantil de resistencia no violenta contra el nazismo","Una unidad de élite de las SS","Un partido monárquico","Una operación militar de 1944"],0,"Se activó en Múnich en 1942-43 con panfletos; sus principales miembros fueron ejecutados.","Resistencia interna: no todo el mundo obedeció.","Resistencia interna: no todo el mundo obedeció."]]};
+CTRY.uk.q.push(["¿Qué tecnología de detección de aviones fue clave en la Batalla de Inglaterra?",["Radar (Chain Home)","Sonar","Telegrafía óptica","Enigma"],0,"La red de radar Chain Home alertó de los ataques alemanes en 1940.","Tecnología sobre ideología.","Tecnología sobre ideología."]);
+CTRY.pl.q.push(["¿Qué criptoanalistas polacos lograron romper los primeros códigos Enigma?",["Rejewski, Różycki y Zygalski","Turing y Welchman","Friedman y Rowlett","Zuse y Konrad"],0,"Los matemáticos del Biuro Szyfrów rompieron Enigma en 1932 y pasaron sus métodos a Francia y Reino Unido en 1939.","Quien rompió Enigma primero no fue quien sale en la película.","Quien rompió Enigma primero no fue quien sale en la película."]);
+const QX={},CQI=[];
+Object.keys(CTRY).forEach(c=>CTRY[c].q.forEach(q=>{Q.push([q[0],q[1],q[2],q[3],99]);QX[Q.length-1]={c,p:q[4],f:q[5]};CQI.push(Q.length-1)}));
+GEN.forEach(q=>{Q.push([q[0],q[1],q[2],q[3],99]);QX[Q.length-1]={c:'*',p:q[4],f:q[5]};CQI.push(Q.length-1)});
+// ---- OBJETOS Y CHAROS ----
+const IT={
+gorro:{n:'Gorro de aluminio',ic:'🧢',p:60,i:'progre',perm:1,d:'Protege de manipulaciones del bando contrario.',fx:'LARPEO -1 por turno',sd:'Paranoia: estabilidad -1 por turno',t:()=>{apply({larperLevel:-1,stability:-1})}},
+decon:{n:'Manual de deconstrucción',ic:'📘',p:40,i:'progre',d:'Revisa tu interpretación ideológica.',fx:'LARPEO -8',sd:'Lealtad -3 (los generales no lo han leído)',use:()=>apply({larperLevel:-8,loyalty:-3})},
+bulos:{n:'Detector de bulos',ic:'🔎',p:35,i:'progre',d:'Pista sobre respuestas engañosas.',fx:'Descarta 2 respuestas falsas en la próxima pregunta',sd:'',use:()=>{G.x.flags.hint=1}},
+trad:{n:'Manual de tradición nacional',ic:'📜',p:70,i:'facha',perm:1,d:'Ventajas satíricas en actos políticos.',fx:'Prestigio +2 por turno',sd:'Credibilidad -1 por turno',t:()=>apply({prestige:2,credibility:-1})},
+mega:{n:'Megáfono propagandístico',ic:'📢',p:40,i:'facha',d:'Altera la percepción de los eventos.',fx:'Prestigio +10',sd:'Credibilidad -4, LARPEO +3',use:()=>apply({prestige:10,credibility:-4,larperLevel:3})},
+arch:{n:'Archivador patriótico',ic:'🗄️',p:60,i:'facha',perm:1,d:'Informes del Archivo desde perspectiva patriótica (satírica).',fx:'Credibilidad +1 por turno; el Archivo añade lectura patriótica',sd:'',t:()=>apply({credibility:1})},
+estatua:{n:'Estatua dorada del líder',ic:'🗿',p:90,i:'facha',a:'exp',perm:1,d:'Se desbloquea al conquistar 5 territorios.',fx:'Prestigio +3 por turno',sd:'Industria -1 por turno (el oro sale de algún sitio)',t:()=>apply({prestige:3,industry:-1})},
+biblio:{n:'Biblioteca de fuentes primarias',ic:'📚',p:90,i:'progre',a:'sabio',perm:1,d:'Se desbloquea con 5 respuestas correctas.',fx:'Credibilidad +2 por turno',sd:'Cuesta 3 de dinero por turno',t:()=>{apply({credibility:2});G.x.money-=3}},
+yate:{n:'Yate de intendencia',ic:'🛥️',p:150,i:null,a:'rico',perm:1,d:'Se desbloquea con 300 de saldo.',fx:'Prestigio +3 por turno',sd:'LARPEO +1 por turno',t:()=>apply({prestige:3,larperLevel:1})},
+cons:{n:'Consultor de McKinsey-ish',ic:'💼',p:50,i:null,min:3,d:'Reorganiza tu industria con diapositivas.',fx:'Industria +15',sd:'Cuesta 10 de dinero extra en consultores',min_t:3,use:()=>{apply({industry:15});G.x.money-=10}}};
+const CH={
+tert:{n:'Chari la Tertuliana',ic:'📺',ide:'facha',c:60,u:5,d:'Opina de todo en directo.',pos:'Prestigio +3/turno',neg:'Credibilidad -2/turno',t:()=>apply({prestige:3,credibility:-2})},
+dial:{n:'Charo Dialéctica',ic:'📚',ide:'progre',c:60,u:5,d:'Todo es una estructura de poder.',pos:'LARPEO -2/turno',neg:'Lealtad -1/turno',t:()=>apply({larperLevel:-2,loyalty:-1})},
+bro:{n:'Charo Bróker',ic:'📈',ide:'neutral',c:80,u:0,d:'Especula con el rancho del ejército.',pos:'+20 dinero/turno',neg:'25% de crash: -35 dinero',t:()=>{G.x.money+=Math.random()<.25?-35:20}}};
+CH.tert.ab=['Tertulia en directo (prestigio +8, credibilidad -3)',()=>apply({prestige:8,credibility:-3})];CH.dial.ab=['Taller de deconstrucción (LARPEO -6)',()=>apply({larperLevel:-6})];CH.bro.ab=['Operación especulativa (50%: +60 / -40 dinero)',()=>{G.x.money+=Math.random()<.5?60:-40}];
+const CHP={'tert+dial':['Bronca en el comité: estabilidad -3',()=>apply({stability:-3})],'tert+bro':['Patrocinio de tertulia: +10 dinero',()=>{G.x.money+=10}]};
+const mkX=()=>({country:'es',ideo:'progre',money:100,tax:1,debt:0,infl:1,inv:[],chr:[],dip:50,flags:{},stock:{},ach:[],cd:{},biz:0,mk:1,corr:0});
+const AC={exp:['Expansión: 5 territorios',()=>mine()>=5],sabio:['Sabio: 5 aciertos',()=>(G.x.corr||0)>=5],rico:['Capitalista: 300 de saldo',()=>G.x.money>=300]};
+const pr=k=>Math.round(IT[k].p*G.x.infl);
+// ---- WRAPS DEL MOTOR ----
+window.migrate=function(){G.x=Object.assign(mkX(),G.x||{});G.v=2};
+const _ng=newGame;newGame=function(d){const g=_ng(d);g.v=2;g.x=mkX();return g};
+let PD_='normal',SEL={c:'es',i:'progre'};
+const _st=start;start=function(d){PD_=d;SEL={c:'es',i:'progre'};show('ctry');rCtry()};
+window.confirmCtry=function(){_st(PD_);const c=CTRY[SEL.c];Object.assign(G.x,{country:SEL.c,ideo:SEL.i,money:c.m,dip:c.dip});if(SEL.c=='pl')G.politics.loyalty=100;if(SEL.c=='uk')G.x.dip=70;saveGame();render();note(c.f+' '+c.n+' · '+IDE[SEL.i])};
+const _sh=show;show=function(id){const M=['ctry','glo','shp','chr','mkt','inv'];M.forEach(x=>$('#'+x).style.display='none');_sh(id);if(M.includes(id))$('#'+id).style.display='flex'};
+const open=id=>{G&&G.x&&_sh('app');$('#'+id).style.display='flex'};
+const _gq=getRandomQuestion;getRandomQuestion=function(){const x=G.x;if(x&&Math.random()<.45){const c=CQI.filter(i=>(QX[i].c==x.country||QX[i].c=='*')&&!G.used.includes(i));if(c.length){const i=c[Math.floor(Math.random()*c.length)],e=QX[i];G.used.push(i);Q[i][0]=`<i style="color:#7a1f14">${esc(x.ideo=='progre'?e.p:e.f)}</i><br>`+Q[i][0].replace(/^<i[^]*?<br>/,'');return i}}return _gq()};
+const _an=ans;ans=function(i){const was=G.phase=='question'&&!G.fb,q=Q[G.q],e=QX[G.q],h=G.x.flags.hint;_an(i);if(!was)return;G.x.flags.hint=0;if(i==q[2])G.x.corr=(G.x.corr||0)+1;if(e){const ok=i==q[2];G.x.money+=ok?15:-10;G.x.dip=cl(G.x.dip+(ok?6:-6));if(e.c!='*'&&!ok)apply({prestige:-2});G.fb+=` [${CTRY[G.x.country].n}: ${ok?'+15 dinero, diplomacia +6':'-10 dinero, diplomacia -6'}]`}save();render()};
+const _re=react;react=function(){_re();const x=G.x,c=CTRY[x.country];let t='<h3>ECONOMÍA</h3>';
+const inc=Math.round((20+G.politics.stability*.2)*c.inc*[.7,1,1.35][x.tax]),up=Math.round(G.army.manpower/1000*2+x.chr.reduce((s,k)=>s+CH[k].u,0)),intr=Math.round(x.debt*.1);
+x.money+=inc-up-intr;x.infl=+(x.infl*1.04).toFixed(3);t+=`<p>Impuestos +${inc} · mantenimiento -${up}${intr?` · intereses -${intr}`:''}. Saldo: ${x.money}. Inflación acumulada: ${Math.round((x.infl-1)*100)}%.</p>`;
+apply({stability:[1,0,-(x.ideo=='progre'?1:3)][x.tax]});
+if(x.ideo=='progre')apply({credibility:1,loyalty:-1});else apply({loyalty:2,credibility:-1});
+x.inv.forEach(k=>IT[k].t&&IT[k].t());x.chr.forEach(k=>CH[k].t());
+Object.keys(CHP).forEach(k=>{const[a,b]=k.split('+');if(x.chr.includes(a)&&x.chr.includes(b)){t+=`<p>CHAROS: ${CHP[k][0]}.</p>`;CHP[k][1]()}});
+if(x.money<-50||x.debt>150){apply({stability:-5,prestige:-3});t+='<p>CRISIS: la deuda y el déficit provocan disturbios (estabilidad -5, prestigio -3).</p>'}
+x.mk=cl(+rnd(.7,1.3).toFixed(2),.5,2);if(x.biz){const rt=Math.round(x.biz*rnd(-.15,.25));x.money+=rt;t+=`<p>Empresas: ${rt>=0?'beneficio +':'pérdida '}${rt}. Precios de mercado x${x.mk}.</p>`}
+Object.keys(AC).forEach(k=>{if(!x.ach.includes(k)&&AC[k][1]()){x.ach.push(k);t+=`<p>🏆 LOGRO: ${AC[k][0]}. Se desbloquean objetos en la tienda.</p>`}});
+x.dip=cl(x.dip+(x.ideo=='facha'?-1:0));G.rep2+=t;save()};
+const _rn=render;render=function(){_rn();if(!G||!G.x)return;const x=G.x,c=CTRY[x.country];
+$('#top').insertAdjacentHTML('beforeend',`<span class=m title="Saldo">💰 ${x.money}${x.money<0?' (DEUDA)':''}</span><span>${c.f} ${IDE[x.ideo]}</span><span title="Relaciones diplomáticas">🤝 ${x.dip}</span><button style="width:auto" onclick="openShop()">🛒 TIENDA</button><button style="width:auto" onclick="openMkt()">💱 MERCADO</button><button style="width:auto" onclick="openInv()">🎒 INVENTARIO</button><button style="width:auto" onclick="openChr()">👥 CHAROS</button><button style="width:auto" onclick="openGlo()">📚 ARCHIVO</button>`);
+if(G.phase=='question'&&!G.fb&&x.flags.hint){const q=Q[G.q],w=[0,1,2,3].filter(i=>i!=q[2]).slice(0,2);document.querySelectorAll('#main button').forEach(b=>{const m=(b.getAttribute('onclick')||'').match(/ans\((\d)\)/);if(m&&w.includes(+m[1]))b.style.display='none'})}
+lockUI()};
+// ---- UI: overlays ----
+document.body.insertAdjacentHTML('beforeend',['ctry','shp','chr','glo','mkt','inv'].map(i=>`<div id="${i}" class="ov" style="display:none"></div>`).join(''));
+const st2=document.createElement('style');st2.textContent='.ov .p{width:100%;max-width:780px;max-height:88vh;overflow:auto;text-align:left}.ov .p button,.ov .row2 button{display:inline-block;width:auto}.ov .p button.w{display:block;width:100%}.ov input,.ov textarea{background:#0d120b;color:var(--w);border:1px solid var(--g);padding:6px;width:100%;font:12px Consolas,monospace}.card{border:1px solid #3d4d31;padding:6px;margin:4px 0;background:#161a13}.ans h4{margin:8px 0 2px;color:var(--b);font-family:Consolas,monospace;border-bottom:1px solid #3d4d31}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}.ld{animation:pu 1s infinite}';document.head.appendChild(st2);
+window.rCtry=function(){const c=CTRY[SEL.c];$('#ctry').innerHTML=`<div class=p><h1 style="font-size:20px">SELECCIÓN DE PAÍS E IDEOLOGÍA</h1><div class=chips><b>País</b>${Object.keys(CTRY).map(k=>`<span class="chip ${SEL.c==k?'on':''}" onclick="SEL_('c','${k}')">${CTRY[k].f} ${CTRY[k].n}</span>`).join('')}</div><div class=card><b>${c.f} ${c.n}</b> · ${c.pos}<br>${c.d}<br><small>Aliados: ${c.al} · Rivales: ${c.ri}<br>Dinero inicial: ${c.m} · Ingresos x${c.inc} · Diplomacia ${c.dip}<br>✔ ${c.pro} · ✖ ${c.con}<br>Preguntas específicas de este país: ${c.q.length}</small></div><div class=chips><b>Ideología</b>${['progre','facha'].map(k=>`<span class="chip ${SEL.i==k?'on':''}" onclick="SEL_('i','${k}')">${IDE[k]}</span>`).join('')}</div><small>${SEL.i=='progre'?'PROGRE: impuestos altos cuestan menos estabilidad, +1 credibilidad/turno, -1 lealtad/turno. Tienda y CHAROS progres.':'FACHA: +2 lealtad/turno, -1 credibilidad/turno, impuestos altos duelen más. Tienda y CHAROS fachas.'} Los hechos históricos son los mismos para ambos: cambia el marco, no la respuesta correcta. Ambos bandos son objeto de sátira.</small><button class=w onclick="confirmCtry()">▶ COMENZAR CAMPAÑA</button><button class=w onclick="show('menu')">VOLVER</button></div>`};
+window.SEL_=(k,v)=>{SEL[k]=v;rCtry()};
+window.openShop=function(){rShop();open('shp')};
+function rShop(){const x=G.x,L=Object.keys(IT).filter(k=>!IT[k].i||IT[k].i==x.ideo);$('#shp').innerHTML=`<div class=p><h1 style="font-size:18px">TIENDA · saldo 💰 ${x.money}</h1><small>Inflación ${Math.round((x.infl-1)*100)}% · Deuda ${x.debt}</small><div class=row2><button onclick="loan()">PEDIR PRÉSTAMO (+100, deuda +120)</button><button onclick="repay()">AMORTIZAR 50</button><button onclick="setTax()">IMPUESTOS: ${['BAJOS','MEDIOS','ALTOS'][x.tax]}</button></div>`+L.map(k=>{const o=IT[k],own=x.inv.includes(k),why=own&&o.perm?'ya comprado':o.a&&!x.ach.includes(o.a)?'logro requerido: '+AC[o.a][0]:x.money<pr(k)?'saldo insuficiente':o.min&&G.turn<o.min?'disponible desde el mes '+o.min:'';return`<div class=card>${o.ic} <b>${o.n}</b> · ${pr(k)} 💰 ${o.perm?'(permanente)':'(consumible)'}<br><small>${o.d}<br>Efecto: ${o.fx}${o.sd?'<br>Efecto secundario: '+o.sd:''}</small><button class=w ${why?'disabled':''} onclick="buy('${k}')">${why?'✖ '+why:'COMPRAR'}</button></div>`}).join('')+`<button class=w onclick="show('app')">VOLVER A LA PARTIDA</button></div>`}
+window.buy=function(k){const o=IT[k],x=G.x;if(x.money<pr(k)||(o.perm&&x.inv.includes(k))||(o.min&&G.turn<o.min)||(o.a&&!x.ach.includes(o.a)))return;x.money-=pr(k);if(o.perm)x.inv.push(k);else x.stock[k]=(x.stock[k]||0)+1;note('Comprado: '+o.n+(o.perm?'':' (en inventario)'));save();render();rShop()};
+window.loan=function(){G.x.money+=100;G.x.debt+=120;save();render();rShop()};
+window.repay=function(){const x=G.x,a=Math.min(50,x.debt,Math.max(0,x.money));x.money-=a;x.debt-=a;save();render();rShop()};
+window.setTax=function(){G.x.tax=(G.x.tax+1)%3;save();render();rShop()};
+window.openChr=function(){rChr();open('chr')};
+function rChr(){const x=G.x;$('#chr').innerHTML=`<div class=p><h1 style="font-size:18px">CHAROS · saldo 💰 ${x.money}</h1>`+Object.keys(CH).map(k=>{const o=CH[k],h=x.chr.includes(k);return`<div class=card>${o.ic} <b>${o.n}</b> · ${o.ide.toUpperCase()} · ${o.c} 💰 + ${o.u}/turno<br><small>${o.d}<br>✔ ${o.pos} · ✖ ${o.neg}</small><button class=w ${!h&&x.money<o.c?'disabled':''} onclick="chiro('${k}')">${h?'DESPEDIR':'CONTRATAR'}</button>${h?`<button class=w ${(x.cd[k]||0)>G.turn?'disabled':''} onclick="chab('${k}')">⚡ ${o.ab[0]}${(x.cd[k]||0)>G.turn?' · disponible en el mes '+x.cd[k]:''}</button>`:''}</div>`}).join('')+`<small>Sinergias/conflictos: Tertuliana + Dialéctica = bronca (estabilidad -3/turno). Tertuliana + Bróker = patrocinio (+10 dinero/turno).</small><button class=w onclick="show('app')">VOLVER A LA PARTIDA</button></div>`}
+window.chiro=function(k){const x=G.x,o=CH[k];if(x.chr.includes(k))x.chr=x.chr.filter(z=>z!=k);else if(x.money>=o.c){x.money-=o.c;x.chr.push(k);if(o.ide!='neutral'&&o.ide!=x.ideo)apply({larperLevel:2})}save();render();rChr()};
+window.chab=function(k){const x=G.x;if((x.cd[k]||0)>G.turn||!x.chr.includes(k))return;CH[k].ab[1]();x.cd[k]=G.turn+3;note('Habilidad: '+CH[k].n);save();render();rChr()};
+window.openInv=function(){rInv();open('inv')};
+function rInv(){const x=G.x;$('#inv').innerHTML=`<div class=p><h1 style="font-size:18px">INVENTARIO</h1><h3>Permanentes</h3>${x.inv.map(k=>`<div class=card>${IT[k].ic} <b>${IT[k].n}</b><br><small>${IT[k].fx}${IT[k].sd?' · '+IT[k].sd:''}</small></div>`).join('')||'<small>Ninguno.</small>'}<h3>Consumibles</h3>${Object.keys(x.stock).filter(k=>x.stock[k]>0).map(k=>`<div class=card>${IT[k].ic} <b>${IT[k].n}</b> x${x.stock[k]}<br><small>${IT[k].fx}</small><button class=w onclick="useIt('${k}')">USAR</button></div>`).join('')||'<small>Ninguno.</small>'}<h3>Logros</h3>${x.ach.map(k=>`<div class=card>🏆 ${AC[k][0]}</div>`).join('')||'<small>Aún ninguno.</small>'}<button class=w onclick="show('app')">VOLVER A LA PARTIDA</button></div>`}
+window.useIt=function(k){const x=G.x;if(!(x.stock[k]>0))return;x.stock[k]--;IT[k].use();note('Usado: '+IT[k].n);save();render();rInv()};
+window.openMkt=function(){rMkt();open('mkt')};
+function rMkt(){const x=G.x,m=x.mk,R={fuel:'⛽ Combustible',ammunition:'🔫 Munición',food:'🍞 Alimentos'},sell=Math.round(22*m),buy=Math.round(30*m),bro=x.chr.includes('bro');
+$('#mkt').innerHTML=`<div class=p><h1 style="font-size:18px">MERCADO · saldo 💰 ${x.money}</h1><small>Precio de mercado x${m} (cambia cada turno). Empresas invertidas: ${x.biz} · Deuda: ${x.debt}</small><h3>Comercio (lotes de 15)</h3>`+Object.keys(R).map(r=>`<div class=card>${R[r]} (${G.resources[r]}) <button ${G.resources[r]<15?'disabled':''} onclick="trade('${r}',1)">VENDER +${sell}</button><button ${G.resources[r]>85||x.money<buy?'disabled':''} onclick="trade('${r}',-1)">COMPRAR -${buy}</button></div>`).join('')+`<h3>Capitalismo satírico</h3><div class=card>🏢 <b>Invertir 50 en empresas</b>: rendimiento cada turno entre -15% y +25%. <button ${x.money<50?'disabled':''} onclick="mk_('inv')">INVERTIR</button><button ${x.biz?'':'disabled'} onclick="mk_('div')">RETIRAR ${x.biz}</button></div><div class=card>🏭 <b>Privatizar industria</b>: +120 dinero; industria -15, estabilidad -3, prestigio -2. <button ${G.resources.industry<15?'disabled':''} onclick="mk_('pri')">PRIVATIZAR</button></div><div class=card>🎰 <b>Especular con 50</b>: ${bro?55:45}% de duplicar, si no se pierde. <button ${x.money<50?'disabled':''} onclick="mk_('spe')">ESPECULAR</button></div><div class=card>🕳️ <b>Desviar fondos (corrupción)</b>: +60 dinero, LARPEO +5, credibilidad -4; 25% de escándalo (estabilidad -8, prestigio -6). <button onclick="mk_('cor')">DESVIAR</button></div><button class=w onclick="show('app')">VOLVER A LA PARTIDA</button></div>`}
+window.trade=function(r,d){const x=G.x,m=x.mk;if(d>0&&G.resources[r]>=15){apply({[r]:-15});x.money+=Math.round(22*m)}else if(d<0&&G.resources[r]<=85&&x.money>=Math.round(30*m)){apply({[r]:15});x.money-=Math.round(30*m)}save();render();rMkt()};
+window.mk_=function(k){const x=G.x;if(k=='inv'&&x.money>=50){x.money-=50;x.biz+=50}else if(k=='div'){x.money+=x.biz;x.biz=0}else if(k=='pri'&&G.resources.industry>=15){x.money+=120;apply({industry:-15,stability:-3,prestige:-2})}else if(k=='spe'&&x.money>=50){const w=Math.random()<(x.chr.includes('bro')?.55:.45);x.money+=w?50:-50;note(w?'La burbuja te sonríe: +50':'Crash: -50')}else if(k=='cor'){x.money+=60;apply({larperLevel:5,credibility:-4});if(Math.random()<.25){apply({stability:-8,prestige:-6});note('¡ESCÁNDALO! Estabilidad -8, prestigio -6')}}save();render();rMkt()};
+// ---- ARCHIVO HISTÓRICO (IA) ----
+const GL=[['Países y naciones','Eje','Alianza de Alemania, Italia y Japón (Pacto Tripartito, 1940), a la que se sumaron Hungría, Rumanía y Bulgaria, entre otros.'],['Países y naciones','Aliados','Coalición encabezada por Reino Unido, URSS y EE. UU., con la Francia Libre, China y muchos otros.'],['Dirigentes políticos','Churchill','Primer ministro británico desde mayo de 1940 hasta julio de 1945.'],['Dirigentes políticos','Stalin','Dirigente de la URSS; firmó el pacto con Alemania en 1939 y su país fue invadido en 1941.'],['Generales y militares','Rommel','Mariscal alemán famoso por el Afrika Korps; derrotado en El Alamein (1942).'],['Generales y militares','Zhúkov','Mariscal soviético que dirigió la defensa de Moscú y la ofensiva sobre Berlín.'],['Batallas','Batalla de Stalingrado','Batalla (1942-43) a orillas del Volga que acabó con la rendición del 6.º Ejército alemán.'],['Batallas','Batalla de Midway','Junio de 1942: EE. UU. hundió cuatro portaaviones japoneses en el Pacífico.'],['Operaciones militares','Operación Barbarroja','Invasión alemana de la URSS iniciada el 22 de junio de 1941.'],['Operaciones militares','Operación Overlord','Desembarco aliado en Normandía el 6 de junio de 1944 (Día D).'],['Armamento y tecnología','T-34','Tanque soviético clave en el frente oriental.'],['Armamento y tecnología','Radar','La red británica Chain Home fue decisiva en la Batalla de Inglaterra (1940).'],['Ideologías y movimientos','Fascismo','Movimiento autoritario y nacionalista surgido en Italia con Mussolini (1922).'],['Ideologías y movimientos','Nazismo','Ideología totalitaria y racista del NSDAP, responsable del Holocausto. El juego la satiriza; no la glorifica.'],['Tratados y alianzas','Pacto Mólotov-Ribbentrop','Pacto germano-soviético de agosto de 1939 con protocolo secreto de reparto de Europa oriental.'],['Tratados y alianzas','Tratado de Versalles','Firmado en 1919; impuso reparaciones y límites militares a Alemania.'],['Acontecimientos históricos','Holocausto','Asesinato sistemático de unos seis millones de judíos europeos y de otras víctimas por el régimen nazi.'],['Acontecimientos históricos','Anschluss (anexión de Austria)','Anexión alemana de Austria, marzo de 1938.'],['Economía y sociedad','Racionamiento','Sistema de cupos de alimentos y bienes en los países beligerantes.'],['Economía y sociedad','Lend-Lease','Programa de EE. UU. (1941) para suministrar material a los Aliados.'],['Consecuencias de la guerra','Juicios de Núremberg','Procesos contra altos dirigentes nazis (1945-46).'],['Consecuencias de la guerra','ONU','Organización fundada en 1945 para mantener la paz.'],['Personajes secundarios','Mannerheim','Mariscal finlandés que dirigió a Finlandia contra la URSS.'],['Personajes secundarios','Tito','Líder partisano yugoslavo.']];
+const CATS=[...new Set(GL.map(g=>g[0]))];
+let hist=[],gc=null,gv=null,gqf=null;try{hist=JSON.parse(localStorage.getItem('lh_hist'))||[]}catch(e){}
+const saveH=()=>{try{localStorage.setItem('lh_hist',JSON.stringify(hist.slice(0,40)))}catch(e){note('No se pudo guardar el historial')}};
+const locked=()=>!!(G&&G.player&&G.player.larperLevel>5);
+const LOCKMSG='ACCESO DENEGADO: Tu nivel de LARPEO ha superado los límites de rigor documental. El buscador ha sido suspendido por riesgo de intoxicación ideológica.';
+window.openGlo=function(){open('glo');rGlo()};
+function rGlo(){const L=locked();if(L)gqf=null;const sv=document.getElementById('gs'),s=(sv&&!L?sv.value:'').toLowerCase(),x=G.x,
+l=getAll().filter(g=>gqf!=null?(g[3]||[]).includes(gqf):s?(g[1]+' '+g[2]).toLowerCase().includes(s):gc?g[0]==gc:false);
+$('#glo').innerHTML=`<div class=p><h1 style="font-size:17px">ARCHIVO HISTÓRICO — INTELIGENCIA DOCUMENTAL</h1><small>Archivo offline con una entrada por cada concepto que aparece en las preguntas del juego. Los hechos no cambian con la ideología.</small>${L?`<p class="alert" style="color:#e74c3c"><b>${LOCKMSG}</b><br><small>Puedes seguir leyendo manualmente por categorías.</small></p>`:''}<input id="gs" placeholder="${L?'BUSCADOR SUSPENDIDO':'Buscar término'}" ${L?'disabled':''} value="${esc(s)}" oninput="gqz();rGlo();var q=document.getElementById('gs');q.focus();q.setSelectionRange(99,99)">${G.phase=='question'&&!G.fb?`<button ${L?'disabled':''} onclick="gq()">🔎 Entradas sobre la pregunta actual</button>`:''}<div class=chips>${CATS.map(c=>`<span class="chip ${gc==c?'on':''}" onclick="gcat(${CATS.indexOf(c)})">${c}</span>`).join('')}</div>${l.map(g=>`<div class=card><b>${g[1]}</b> <small>· ${g[0]}</small><br>${g[2]}${x.inv.includes('arch')?'<br><small style="color:#7a1f14">Nota patriótica (satírica): «Y todo esto lo hicimos nosotros, claro».</small>':''}<br><button onclick="gview(${getAll().indexOf(g)})">📌 MARCAR COMO CONSULTADO</button></div>`).join('')||'<small>Elige una categoría'+(L?'.':' o escribe un término.')+'</small>'}<h3>HISTORIAL DE CONSULTAS</h3>${hist.map(h=>`<div class=card>${esc(h)}</div>`).join('')||'<small>Vacío.</small>'}<button onclick="clearH()">BORRAR HISTORIAL</button><button onclick="show('app')">VOLVER A LA PARTIDA</button></div>`}
+window.rGlo=rGlo;window.gcat=i=>{gqf=null;gc=gc==CATS[i]?null:CATS[i];rGlo()};
+window.gview=i=>{const t=getAll()[i][1];hist=[t,...hist.filter(h=>h!=t)].slice(0,40);saveH();rGlo()};
+window.clearH=()=>{hist=[];saveH();rGlo()};
+// ---- BLOQUEO CTRL+F según LARPEO ----
+function lockUI(){const g=document.getElementById('gs');if(g){g.disabled=locked();g.placeholder=locked()?'BUSCADOR SUSPENDIDO':'Buscar en el historial'}}
+// ---- TÁCTICA v3: terreno, clima, doctrinas y órdenes por país; integrada con economía, ideología, objetos, CHAROS y diplomacia ----
+const TT=['llanura','bosque','montaña','ciudad','costa','llanura','montaña','ciudad'],TM={llanura:1,bosque:1.1,'montaña':1.2,ciudad:1.15,costa:1.05},AF={es:'montaña',uk:'costa',pl:'bosque',fr:'bosque',us:'llanura',it:'ciudad',de:'ciudad'},TP={es:1,uk:1.03,pl:.97,fr:.98,us:1.08,it:1,de:1.03};
+const W=t=>t<=2||t==12?['Invierno',.9]:t<=4||t>=10?['Lluvia',.95]:['Despejado',1];
+const DOC={es:['Defensa elástica',.95,.7,1.3],uk:['Poder naval-aéreo',1.05,.9,1.1],pl:['Guerra de guerrillas',.9,.8,1.25],fr:['Resistencia coordinada',1,.85,1.1],us:['Superioridad material',1.15,1.1,1],it:['Maniobra oportunista',1.05,1,.9],de:['Cooperación multilateral',1,.8,1.15]};
+Object.keys(DOC).forEach(c=>{const d=DOC[c];PL['doc_'+c]={n:d[0]+' ('+CTRY[c].n+')',a:d[1],c:d[2],d:d[3]};PT['doc_'+c]='Doctrina propia de '+CTRY[c].n+': poder x'+d[1]+', bajas x'+d[2]+', defensa x'+d[3]+'.'});
+const SP={neutral:{c:'es',m:15,r:{food:5},t:'NEUTRALIDAD',ic:'🕊',d:'Maniobra de neutralidad: el enemigo no contraataca este turno; diplomacia +5.',f:()=>{G.x.flags.nocount=1;G.x.dip=cl(G.x.dip+5);return'España juega a no estar. Diplomacia +5.'}},
+blockade:{c:'uk',m:20,r:{fuel:10},t:'BLOQUEO',ic:'⚓',d:'Bloqueo naval: +15% de poder en el próximo ataque.',f:()=>{G.x.flags.dbuf=1;return'La Royal Navy aprieta el cerco.'}},
+partisans:{c:'pl',m:0,r:{ammunition:5},t:'PARTISANOS',ic:'🌲',d:'Guerrilla: contraataque enemigo -30% este turno; moral +4.',f:()=>{G.x.flags.gue=1;apply({morale:4});return'Los partisanos sabotean las líneas.'}},
+resist:{c:'fr',m:10,r:{food:5},t:'RESISTENCIA',ic:'📻',d:'Red de resistencia: activa inteligencia (+15%) y estabilidad +3.',f:()=>{G.intel=true;apply({stability:3});return'La red informa desde el interior.'}},
+produccion:{c:'us',m:40,r:{},t:'PRODUCCIÓN',ic:'🏭',d:'Producción masiva: +15 combustible, munición y comida.',f:()=>{apply({fuel:15,ammunition:15,food:15});return'Las fábricas no duermen.'}},
+oportunismo:{c:'it',m:0,r:{},t:'OPORTUNISMO',ic:'🎭',d:'Gastas 10 de diplomacia: +15% de poder en el próximo ataque.',f:()=>{G.x.dip=cl(G.x.dip-10);G.x.flags.dip15=1;return'Un cambio de planes con letra pequeña.'}},
+ingenieria:{c:'de',m:25,r:{industry:10},t:'INGENIERÍA',ic:'⚙',d:'Ingeniería de precisión: equipo +12.',f:()=>{apply({equipment:12});return'Ingeniería de calidad, con papeleo.'}}};
+Object.keys(SP).forEach(k=>{const s=SP[k];A[k]={d:s.d+(s.m?' (coste: '+s.m+' dinero)':''),c:s.r};IC[k]=s.ic;OT[k]=s.d+' Solo disponible para '+CTRY[s.c].n+'.'});
+IT.aereo={n:'Apoyo aéreo contratado',ic:'✈️',p:70,i:null,d:'Aviación por encargo.',fx:'Próximo ataque +20% e ignora el clima',sd:'Gasta 10 de combustible',use:()=>{G.x.flags.air=1;apply({fuel:-10})}};
+{const mu=IT.mega.use;IT.mega.use=()=>{mu();G.x.flags.atkb=1};IT.mega.fx+=' · próximo ataque +10%';IT.arch.fx+=' · inteligencia +5% extra'}
+CH.dial.pos+=' · bajas -10%';CH.bro.pos+=' · +25 dinero de botín por victoria';
+const _w=why;why=function(k){const s=SP[k];if(s){if(s.c!=G.x.country)return'no disponible';if(G.x.money<s.m)return'falta dinero';if(k=='oportunismo'&&G.x.dip<10)return'falta diplomacia'}return _w(k)};
+const _ap=atkPow;atkPow=function(){let v=_ap();const x=G.x;if(!x)return v;const c=x.country,f=x.flags;v*=TP[c]*(x.ideo=='facha'?1.08:1);if(G.sel!=null&&TT[G.sel]==AF[c])v*=1.1;if(!f.air)v*=W(G.turn)[1];if(f.atkb)v*=1.1;if(f.air)v*=1.2;if(f.dbuf)v*=1.15;if(f.dip15)v*=1.15;if(x.dip>=70)v*=1.05;if(x.dip<=25)v*=.95;if(x.money<0)v*=.92;if(x.inv.includes('estatua'))v*=1.03;if(x.inv.includes('arch')&&G.intel)v*=1.04;return v};
+const _dp=defPow;defPow=function(i){return _dp(i)*TM[TT[i]]};
+const _od=order;order=function(k){if(G.phase!='strategy'||why(k))return;const x=G.x,s=SP[k],sel=G.sel,pl=PL[G.plan],oc=pl.c;if(s)x.money-=s.m;if(k=='attack')x.money-=10;pl.c=oc*(x.ideo=='facha'?1.15:.9)*(x.chr.includes('dial')?.9:1);const txt=s?s.f():'';
+try{_od(k)}finally{pl.c=oc}if(G.phase!='report')return;let ex='';
+if(k=='attack'){if(G.last=='win'){const b=Math.round(TER[sel][1]/3)+(x.chr.includes('bro')?25:0);x.money+=b;ex=`<p>Botín y recaudación: +${b} dinero. (Ataque: -10 dinero.)</p>`}else ex='<p>Ataque: -10 dinero.</p>';x.flags.atkb=x.flags.air=x.flags.dbuf=x.flags.dip15=0}
+G.rep=G.rep.replace('<h3>INFORME DE BATALLA</h3>','<h3>INFORME DE BATALLA</h3>'+(txt?`<p>${txt}</p>`:'')+ex);save();render()};
+const _ct=counter;counter=function(){const x=G.x,f=x.flags;if(f.nocount){f.nocount=0;G.def=false;G.ret=false;return'<p>El enemigo no contraataca este turno.</p>'}const D=DIF[G.diff],o=D.en;let m=1;if(x.dip>=70)m*=.85;if(f.gue){m*=.7;f.gue=0}if(W(G.turn)[0]=='Invierno')m*=.9;D.en=o*m;try{return _ct()}finally{D.en=o}};
+const _rt=render;render=function(){_rt();if(!G||!G.x)return;const x=G.x,c=x.country,fl=x.flags;
+document.querySelectorAll('#main button,#main .chip').forEach(b=>{const o=b.getAttribute('onclick')||'',m=o.match(/order\('(\w+)'\)/)||o.match(/setPlan\('doc_(\w+)'\)/);if(m){const k=m[1],cc=SP[k]?SP[k].c:k;if((SP[k]||o.startsWith('setPlan'))&&cc!=c)b.remove()}});
+$('#top').insertAdjacentHTML('beforeend',`<span title="Clima: modifica el ataque">☁ ${W(G.turn)[0]}</span>`);
+const s=G.sel;if(s!=null)$('#info').insertAdjacentHTML('beforeend',` · terreno ${TT[s]} (defensa x${TM[TT[s]]})${TT[s]==AF[c]?' · afinidad de tu país: ataque +10%':''}`);
+const og=$('#main .og');if(og){const b=[];if(fl.atkb)b.push('megáfono +10%');if(fl.air)b.push('apoyo aéreo +20%');if(fl.dbuf)b.push('bloqueo +15%');if(fl.dip15)b.push('oportunismo +15%');if(fl.nocount)b.push('sin contraataque');if(fl.gue)b.push('guerrilla');og.insertAdjacentHTML('beforebegin',`<p class=m><small>Clima: ${W(G.turn)[0]} (ataque x${W(G.turn)[1]}). Afinidad de ${CTRY[c].n}: terreno ${AF[c]}. Ideología: ${x.ideo=='facha'?'ataque +8%, bajas +15%':'bajas -10%'}. Diplomacia ${x.dip}: ${x.dip>=70?'aliados refuerzan (+5% ataque, contraataque -15%)':x.dip<=25?'aislamiento (-5% ataque)':'neutra'}.${x.money<0?' DEUDA: ataque -8%.':''}${b.length?' Activos: '+b.join(', ')+'.':''}</small></p>`)}};
+// ---- v4: mapa y generales por país + archivo ligado a TODAS las preguntas ----
+const TN={es:[['Castilla','Pirineos','Gibraltar','Canarias','Marruecos español','Vóljov','Nóvgorod','Leningrado'],['llanura','montaña','costa','costa','montaña','bosque','bosque','ciudad']],
+uk:[['Inglaterra','Escocia','Calais','Dunkerque','Gales','Normandía','Ruhr','Berlín'],['llanura','montaña','costa','costa','montaña','bosque','ciudad','ciudad']],
+pl:[['Mazovia','Pequeña Polonia','Danzig','Prusia Oriental','Silesia','Polesia','Volinia','Berlín'],['llanura','montaña','costa','bosque','ciudad','bosque','llanura','ciudad']],
+fr:[['Isla de Francia','Alsacia','Ardenas','Flandes','Provenza','Renania','Baviera','Berlín'],['llanura','montaña','bosque','llanura','costa','ciudad','montaña','ciudad']],
+us:[['Costa Este','Hawái','Normandía','Sicilia','Costa Oeste','Midway','Iwo Jima','Tokio'],['llanura','costa','costa','costa','llanura','costa','montaña','ciudad']],
+it:[['Lombardía','Sicilia','Etiopía','Libia','Cerdeña','Grecia','Albania','Londres'],['ciudad','costa','montaña','llanura','costa','montaña','montaña','ciudad']],
+de:[['Baviera','Renania','Prusia','Sajonia','Hesse','Ruhr','Berlín Oeste','Berlín Este'],['montaña','ciudad','llanura','llanura','bosque','ciudad','ciudad','ciudad']]};
+const GN={es:['Valdés','Quiroga','Medina','Ocaña','Lozano','Montero'],uk:['Ashford','Whitcombe','Pemberton','Harcourt','Thornley','Cavendish'],pl:['Kowalczyk','Zawadzki','Nowicki','Wróbel','Mazur','Lis'],fr:['Dubreuil','Lefèvre','Marchand','Delcourt','Vasseur','Roussel'],us:['Hollister','Brennan','Whitaker','Caldwell','Mercer','Sutton'],it:['Ferrante','Colombo','Bellini','Moretti','Greco','Valentini'],de:['Hartmann','Keller','Lindner','Vogel','Brandl','Seidel']};
+function applyTer(){const x=G&&G.x,t=x&&TN[x.country];if(!t)return;t[0].forEach((n,i)=>TER[i][0]=n);t[1].forEach((y,i)=>TT[i]=y)}
+{const _cc=confirmCtry;confirmCtry=window.confirmCtry=function(){_cc();GN[G.x.country].forEach((n,i)=>G.gens[i].name='Gen. '+n);saveGame();render()}}
+{const _r4=render;render=function(){applyTer();_r4();if(!G||!G.x)return;const c=CTRY[G.x.country],b=$('#top b');if(b)b.textContent=c.f+' '+c.n.toUpperCase()+' · RÉGIMEN FICTICIO'}}
+// ---- archivo completo: una entrada por cada concepto que aparece en las preguntas ----
+let ALLC=null;const POL=['Churchill','Roosevelt','Stalin','Hirohito','Mussolini','Truman','Attlee','De Gaulle','Pétain','Tito','Chiang Kai-shek','Mannerheim'];
+const clsf=s=>/batalla|Stalingrado|Midway|Alamein|Kursk|Dunkerque|Ardenas|Gleiwitz/i.test(s)?'Batallas':/desembarc|invasi|operaci|plan alem/i.test(s)?'Operaciones militares':/tanque|caza|acorazado|radar|bomba|Enigma|criptoanal|arma/i.test(s)?'Armamento y tecnología':/Yalta|Versalles|pacto|armisticio|Conferencia|tratado/i.test(s)?'Tratados y alianzas':/Churchill|Mussolini|Franco|Pétain|De Gaulle|líder|canciller|ministro/i.test(s)?'Dirigentes políticos':/propaganda|opini|fascis|nazis|régimen|ideolog/i.test(s)?'Ideologías y movimientos':/Holocausto|pogromo|Cristales/i.test(s)?'Acontecimientos históricos':/Lend|econom|ayuda|producci/i.test(s)?'Economía y sociedad':/ocupaci|dividid|rendici|ONU|Núremberg/i.test(s)?'Consecuencias de la guerra':'Acontecimientos históricos';
+function getAll(){if(ALLC)return ALLC;const m=new Map(),T=GL.map(g=>g.slice());T.forEach(g=>m.set(g[1].toLowerCase(),g));
+const put=(cat,t,x,qi)=>{const k=t.toLowerCase();if(m.has(k)){const g=m.get(k);g[3]=[...(g[3]||[]),qi];return}const g=[cat,t,x,[qi]];m.set(k,g);T.push(g)};
+Object.keys(CTRY).forEach(c=>{const o=CTRY[c];put('Países y naciones',o.f+' '+o.n,`${o.d} Posición: ${o.pos}. Aliados: ${o.al}. Rivales: ${o.ri}.`,-1)});
+Q.forEach((q,qi)=>{const tx=q[0].replace(/^<i[^]*?<br>/,''),e=q[3],r=e.match(/^(.+?): (.+?)\.$/);if(/^Orden cronol/.test(e))return;
+if(/^¿En qué año ocurrió: /.test(tx)&&r){const n=r[1];put(/Batalla|Bombardeo|Hundimiento|Día D|Caída|Rendición|Liberación/.test(n)?'Batallas':/Conferencia|Acuerdo|Pacto|Armisticio|OTAN/.test(n)?'Tratados y alianzas':'Acontecimientos históricos',n,'Ocurrió en '+r[2]+'.',qi);return}
+if(/^¿(De qué país era|Cuál de estos equipos)/.test(tx)&&r){put('Armamento y tecnología',r[1],'Equipo militar de '+r[2]+'.',qi);return}
+if(/^¿(En qué país se libró|Qué batalla se libró)/.test(tx)&&r){put('Batallas','Batalla de '+r[1],'Se libró en '+r[2]+'.',qi);return}
+if(/^¿(A qué país se asocia|Cuál de estos personajes)/.test(tx)&&r){put(POL.includes(r[1])?'Dirigentes políticos':'Generales y militares',r[1],'Asociado con '+r[2]+' durante la guerra.',qi);return}
+if(/^Operación /.test(e)&&r&&/Operación|Cómo se llamó/.test(tx)){const d=r[2];put('Operaciones militares',r[1],d.charAt(0).toUpperCase()+d.slice(1)+'.',qi);return}
+const st=tx.replace(/^¿|\?$/g,'');put(clsf(st+' '+e),st,e,qi)});
+return ALLC=T}
+window.getAll=getAll;window.gq=()=>{if(locked())return;gqf=G.q;gc=null;rGlo()};window.gqz=()=>{gqf=null};
+addEventListener('keydown',e=>{if(!G||!G.player||$('#app').style.display=='none'&&$('#glo').style.display=='none')return;if(((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()=='f')||e.key=='F3'){if(locked()){e.preventDefault();e.stopPropagation();note(LOCKMSG)}}},true);
+})();
+</script></body></html>
